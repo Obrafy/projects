@@ -7,7 +7,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigInterface, loader, validationSchema } from './config';
 import { TasksModule } from './tasks/tasks.module';
 
-
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -29,7 +28,7 @@ import { TasksModule } from './tasks/tasks.module';
 
     ProjectsModule,
 
-    TasksModule,
+    TasksModule
   ],
   controllers: [AppController],
   providers: [],
