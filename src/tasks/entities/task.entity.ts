@@ -1,8 +1,13 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Document, SchemaTypes, Types} from 'mongoose';
+import { Document } from 'mongoose';
 import mongoose from 'mongoose';
 
 export type TaskDocument = Task & Document;
+
+enum LevelType {
+    LOW = 'LOW',
+    HIGH = 'HIGH',
+}
 
 @Schema()
 export class Task extends mongoose.Document {
@@ -13,21 +18,18 @@ export class Task extends mongoose.Document {
     @Prop()
     activity: string;
 
-    @Prop()
+    @Prop({ type: String, enum: LevelType, default: LevelType.LOW })
     noiseLevel: string;
 
-    @Prop()
-    messLevel: string // LOW Pesquisar ENUM
-}
+    @Prop({ type: String, enum: LevelType, default: LevelType.LOW })
+    messLevel: string;
 
-export const TaskSchema = SchemaFactory.createForClass(Task);
-//export = mongoose.model<UserDoc>('User', userSchema);
-
-
-   // @Prop()
+    // @Prop()
     // possibleSkills: {
     //     skill: Skill; // 1 (Pintura de Chapisco) , 3 (Pintura Convencional)
     //     requiredSkillLevel: number; // 2*, 5*;
     // }[];
+}
 
+export const TaskSchema = SchemaFactory.createForClass(Task);
 
