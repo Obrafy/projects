@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsDateString, IsString, IsNotEmpty, ValidateNested} from 'class-validator'
+import { IsDateString, IsString, IsNotEmpty, ValidateNested } from 'class-validator'
 
 class Address {
     @IsString()
@@ -17,13 +17,25 @@ class Address {
 }
 
 
-class Tasks {}
+class Tasks {
+    @IsNotEmpty()
+    category: string;
+
+    @IsNotEmpty()
+    activity: string;
+
+    @IsString()
+    noiseLevel: string;
+
+    @IsString()
+    messLevel: string;
+}
 
 export class CreateProjectDto {
 
     id: string;
     status: string;
-    
+
     @IsNotEmpty()
     startDate: Date;
 
