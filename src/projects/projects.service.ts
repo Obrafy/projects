@@ -9,6 +9,7 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Address, AddressDocument } from './entities/address.entity';
 import { TasksService } from 'src/tasks/tasks.service';
+import { Task } from 'src/tasks/entities/task.entity';
 
 @Injectable()
 export class ProjectsService {
@@ -24,18 +25,17 @@ export class ProjectsService {
   async create(createProjectDto: CreateProjectDto): Promise<Project> {
     this.logger.log('Creating new project');
     const { address, tasks } = createProjectDto
+    
+    const tasksCreated = await Promise.all(tasks.map(async (task) => {
+      const taskCreated = await this.tasksService.create(task)
+      return taskCreated
+    }));
 
-    const valueTaks = tasks.map(async (task) => {
-      const value = await this.tasksService.create(task)
-      this.logger.log('Creating new project');
-      console.log(value._id)
-      return value._id
-    })
-
-    // createProjectDto.tasks = valueTaks
-
-    // this.logger.log('Creating new taks', valueTaks);
-    const project = new this.projectModel(createProjectDto);
+    const project = new this.projectModel({
+      ...createProjectDto, 
+      ["tasks.task"]: tasksCreated,
+    });
+    
     const addressOfProject = new this.addressModel(address);
     project.save()
     addressOfProject.save()
