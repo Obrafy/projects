@@ -5,7 +5,7 @@ import { UpdateProjectDto } from './dto/update-project.dto';
 
 @Controller('projects')
 export class ProjectsController {
-  constructor(private readonly projectsService: ProjectsService) {}
+  constructor(private readonly projectsService: ProjectsService) { }
 
   @Post()
   create(@Body() createProjectDto: CreateProjectDto) {
@@ -31,4 +31,10 @@ export class ProjectsController {
   remove(@Param('id') id: string) {
     return this.projectsService.remove(id);
   }
+
+  @Get(':id/tasks')
+  findAllTaskOfProject(@Param('id') id: string) {
+    return this.projectsService.findAllTaskOfProject(id);
+  }
+
 }
