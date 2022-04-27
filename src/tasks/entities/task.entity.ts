@@ -10,7 +10,7 @@ enum LevelType {
 }
 
 @Schema()
-export class Task extends mongoose.Document {
+export class Task {
 
     @Prop()
     category: string;
