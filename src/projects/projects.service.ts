@@ -9,7 +9,6 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Address, AddressDocument } from './entities/address.entity';
 import { TasksService } from 'src/tasks/tasks.service';
-import { Task } from 'src/tasks/entities/task.entity';
 
 @Injectable()
 export class ProjectsService {
@@ -25,20 +24,20 @@ export class ProjectsService {
   async create(createProjectDto: CreateProjectDto): Promise<Project> {
     this.logger.log('Creating new project');
     const { address, tasks } = createProjectDto
-    
+
     const tasksCreated = await Promise.all(tasks.map(async (task) => {
       const taskCreated = await this.tasksService.create(task)
-      return taskCreated
+      return taskCreated._id
     }));
 
     const project = new this.projectModel({
-      ...createProjectDto, 
+      ...createProjectDto,
       ["tasks.task"]: tasksCreated,
     });
-    
+
     const addressOfProject = new this.addressModel(address);
-    project.save()
     addressOfProject.save()
+    project.save()
     return project
   }
 
@@ -49,7 +48,7 @@ export class ProjectsService {
 
   async findOne(id: string): Promise<Project> {
     this.logger.log('Find one  by id', id);
-    const project = await this.projectModel.findOne({ _id: id })
+    const project = await (await this.projectModel.findOne({ _id: id })).populate("tasks.task")
     return project
   }
 
@@ -61,6 +60,18 @@ export class ProjectsService {
     this.logger.log('Remove Project by ID', id);
     await this.projectModel.findOneAndDelete({ _id: id })
   }
+
+
+  async findAllTaskOfProject(id: string): Promise<Project> {
+    this.logger.log('Find Tasks one project by id', id);
+    const tasks = await (await this.projectModel
+      .findOne({ _id: id }, { "tasks": 1 }))
+      .populate({
+        path: 'tasks.task',
+      })
+    return tasks
+  }
+
 }
 
 
