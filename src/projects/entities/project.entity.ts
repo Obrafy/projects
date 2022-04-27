@@ -16,8 +16,6 @@ export type ProjectDocument = Project & Document;
 
 @Schema()
 export class Project {
-    // @Prop({ type: SchemaTypes.ObjectId})
-    // id: Types.ObjectId;
 
     @Prop({ type: String, enum: StatusType, default: StatusType.START })
     status: string;
@@ -38,7 +36,7 @@ export class Project {
     address: Address; 
 
     @Prop({ type: ProjectTasks })
-    tasks: ProjectTasks;  
+    tasks: ProjectTasks[];  
 }
 
 export const ProjectSchema = SchemaFactory.createForClass(Project);
