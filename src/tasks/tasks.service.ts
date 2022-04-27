@@ -13,26 +13,30 @@ export class TasksService {
 
   private readonly logger = new Logger(TasksService.name);
 
-  async create(createTaskDto: CreateTaskDto): Promise<Task> {
+  async create(createTaskDto: CreateTaskDto): Promise<TaskDocument> {
     this.logger.log('Creating new task');
     const task = new this.taskModel(createTaskDto)
     task.save()
     return task
   }
 
-  findAll() {
-    return `This action returns all tasks`;
+  async findAll() {
+    this.logger.log('Find all Tasks');
+    return this.taskModel.find().exec()
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} task`;
+  async findOne(id: string) {
+    this.logger.log('Find task by id', id);
+    const task = await this.taskModel.findOne({ _id: id })
+    return task
   }
 
-  update(id: number, updateTaskDto: UpdateTaskDto) {
-    return `This action updates a #${id} task`;
+  async update(id: string, updateTaskDto: UpdateTaskDto) {
+    return this.taskModel.findOneAndUpdate({ _id: id }, updateTaskDto).exec()
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} task`;
+  async remove(id: string) {
+    this.logger.log('Remove Task by ID', id);
+    await this.taskModel.findOneAndDelete({ _id: id })
   }
 }
