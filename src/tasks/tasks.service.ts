@@ -15,6 +15,7 @@ export class TasksService {
 
   async create(createTaskDto: CreateTaskDto): Promise<TaskDocument> {
     this.logger.log('Creating new task');
+    // TODO - find id de Skill before.
     const task = new this.taskModel(createTaskDto)
     task.save()
     return task

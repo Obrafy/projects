@@ -1,5 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsDateString, IsString, IsNotEmpty, ValidateNested } from 'class-validator'
+import { Task } from 'src/tasks/entities/task.entity';
+import { TasksModule } from 'src/tasks/tasks.module';
 
 class Address {
     @IsString()
@@ -16,20 +18,6 @@ class Address {
     state: string;
 }
 
-
-class Tasks {
-    @IsNotEmpty()
-    category: string;
-
-    @IsNotEmpty()
-    activity: string;
-
-    @IsString()
-    noiseLevel: string;
-
-    @IsString()
-    messLevel: string;
-}
 
 export class CreateProjectDto {
 
@@ -54,8 +42,8 @@ export class CreateProjectDto {
     address: Address
 
     @IsNotEmpty()
-    @Type(() => Tasks)
+    @Type(() => Task)
     @ValidateNested()
-    tasks: Tasks[]
+    tasks: Task[]
 
 }
