@@ -1,16 +1,9 @@
 import { Type } from 'class-transformer';
 import { IsString, IsNotEmpty, ValidateNested, IsArray, IsNumber } from 'class-validator'
-
-class Skill {
-    
-    @IsNotEmpty()
-    name: string 
-}
-
 class PossibleSkills {
 
     @IsNotEmpty()
-    skill: Skill; // pintura
+    skillId: string; // pintura
 
     @IsNotEmpty()
     @IsNumber()

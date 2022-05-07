@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document } from 'mongoose';
-import { Skill } from "./skill.entity";
 
 export type TaskDocument = Task & Document;
 
@@ -9,16 +8,14 @@ enum LevelType {
     HIGH = 'HIGH',
 }
 
-@Schema({ _id: false })
-export class PossibleSkills extends Document {
+class PossibleSkills {
 
-    @Prop({ type: Skill, required: true })
-    skill: Skill;
+    @Prop()
+    skillId: string;
 
-    @Prop({ required: true })
+    @Prop()
     requiredSkillLevel: number;
 }
-
 @Schema()
 export class Task {
 
@@ -34,8 +31,10 @@ export class Task {
     @Prop({ type: String, enum: LevelType, default: LevelType.LOW })
     messLevel: string;
 
-    @Prop({ type: PossibleSkills, required: true })
-    possibleSkills: PossibleSkills[];
+    @Prop({ required: true })
+    possibleSkills: PossibleSkills[]
 }
 
 export const TaskSchema = SchemaFactory.createForClass(Task);
+
+
