@@ -42,7 +42,6 @@ export class CreateProjectDto {
     address: Address
 
     @IsNotEmpty()
-    @Type(() => Task)
     @ValidateNested()
     tasks: Task[]
 
