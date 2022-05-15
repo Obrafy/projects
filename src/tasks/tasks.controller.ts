@@ -1,42 +1,46 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Inject } from '@nestjs/common';
+import { GrpcMethod } from '@nestjs/microservices';
+import { FindAllResponse, TASK_SERVICE_NAME } from './dto/proto/task.pb';
 import { TasksService } from './tasks.service';
+
+import {
+  FindOneTaskRequest,
+  RemoveTaskRequest,
+  UpdateRequest,
+} from './dto/task.dto';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 
-@Controller('tasks')
+@Controller()
 export class TasksController {
-  constructor(private readonly tasksService: TasksService) {}
+  @Inject(TasksService)
+  private readonly tasksService: TasksService;
 
-  @Post()
-  create(@Body() createTaskDto: CreateTaskDto) {
+  @GrpcMethod(TASK_SERVICE_NAME, 'create')
+  private create(createTaskDto: CreateTaskDto) {
     return this.tasksService.create(createTaskDto);
   }
 
-  @Get()
-  findAll() {
+  @GrpcMethod(TASK_SERVICE_NAME, 'findAll')
+  private findAll(): Promise<FindAllResponse> {
     return this.tasksService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.tasksService.findOne(id);
+  @GrpcMethod(TASK_SERVICE_NAME, 'findOne')
+  private findOne(payload: FindOneTaskRequest) {
+    return this.tasksService.findOne(payload);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
-    return this.tasksService.update(id, updateTaskDto);
+  @GrpcMethod(TASK_SERVICE_NAME, 'update')
+  private update({ id, data }: UpdateRequest) {
+    return this.tasksService.update({
+      id,
+      payload: data as UpdateTaskDto,
+    });
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.tasksService.remove(id);
+  @GrpcMethod(TASK_SERVICE_NAME, 'remove')
+  private remove(payload: RemoveTaskRequest) {
+    return this.tasksService.remove(payload);
   }
 }
