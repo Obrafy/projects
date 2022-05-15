@@ -62,7 +62,6 @@ export class ProjectsService {
     const queryResult = await this.projectModel.find().exec();
 
     const result = queryResult.map((project: ProjectDocument) => {
-
       return {
         status: project.status,
         startDate: new Date(project.startDate).getTime(),
@@ -161,7 +160,7 @@ export class ProjectsService {
         messLevel: item.task.messLevel,
       };
     });
-    
+
     return { status: HttpStatus.OK, error: null, data: result };
   }
 }

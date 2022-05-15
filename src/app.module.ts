@@ -28,10 +28,9 @@ import { TasksModule } from './tasks/tasks.module';
 
     ProjectsModule,
 
-    TasksModule
+    TasksModule,
   ],
   controllers: [AppController],
   providers: [],
 })
-
 export class AppModule {}

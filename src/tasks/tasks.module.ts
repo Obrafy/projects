@@ -8,11 +8,13 @@ import { Task, TaskSchema } from './entities/task.entity';
   controllers: [TasksController],
   providers: [TasksService],
   exports: [TasksService],
-  imports: [MongooseModule.forFeature([
-    {
-      name: Task.name,
-      schema: TaskSchema,
-    },
-  ])],
+  imports: [
+    MongooseModule.forFeature([
+      {
+        name: Task.name,
+        schema: TaskSchema,
+      },
+    ]),
+  ],
 })
 export class TasksModule {}
