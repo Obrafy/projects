@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package project;
+
+service ProjectService {
+  rpc create (ProjectCreateRequest) returns (ProjectCreateResponse) {}
+}
+
+
+// Create Project
+
+message ProjectCreateRequest {
+    string startDate = 1;
+	string expectedFinishedDate = 2;
+	string responsible = 3;
+    Address address = 4;
+    repeated Task tasks = 5;
+}
+
+message Address {
+    string zipCode = 1;
+    string street = 2;
+    string number = 3;
+    string neighborhood = 4;
+    string city = 5;
+    string state = 6;
+}
+
+message Task {
+    string category = 1;
+    string activity = 2;
+    string noiseLevel = 3;
+    string messLevel = 4;
+    repeated PossibleSkills possibleSkills = 5;
+}
+
+message PossibleSkills {
+    string skillId = 1;
+    int32 requiredSkillLevel = 2;
+}
+
+message ProjectCreateResponse {
+  int32 status = 1;
+  repeated string error = 2;
+}
