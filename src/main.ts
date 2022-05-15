@@ -4,7 +4,6 @@ import { NestFactory } from '@nestjs/core';
 import { join } from 'path';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
-import { protobufPackage } from './projects/dto/proto/project.pb';
 
 async function bootstrap() {
   const app: INestMicroservice = await NestFactory.createMicroservice(
@@ -13,13 +12,11 @@ async function bootstrap() {
       transport: Transport.GRPC,
       options: {
         url: `${process.env.HOST}:${process.env.PORT}`,
-        package: protobufPackage,
-        protoPath: join(
-          'node_modules',
-          'proto',
-          'proto-files',
-          'project.proto',
-        ),
+        package: ['project', 'task'],
+        protoPath: [
+          join('node_modules', 'proto', 'proto-files', 'project.proto'),
+          join('node_modules', 'proto', 'proto-files', 'task.proto'),
+        ],
       },
     },
   );
