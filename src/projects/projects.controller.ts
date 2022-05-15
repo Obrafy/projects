@@ -1,40 +1,52 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common';
-import { ProjectsService } from './projects.service';
-import { CreateProjectDto } from './dto/create-project.dto';
+import { Controller, Inject } from '@nestjs/common';
+import { GrpcMethod } from '@nestjs/microservices';
+
+import {
+  CreateProjectRequest,
+  FindAllTaskOfProjectRequest,
+  FindOneProjectRequest,
+  RemoveProjectRequest,
+  UpdateRequest,
+} from './dto/project.dto';
+import { FindAllResponse, PROJECT_SERVICE_NAME } from './dto/proto/project.pb';
 import { UpdateProjectDto } from './dto/update-project.dto';
+import { ProjectsService } from './projects.service';
 
-@Controller('projects')
+@Controller()
 export class ProjectsController {
-  constructor(private readonly projectsService: ProjectsService) { }
+  @Inject(ProjectsService)
+  private readonly projectsService: ProjectsService;
 
-  @Post()
-  create(@Body() createProjectDto: CreateProjectDto) {
+  @GrpcMethod(PROJECT_SERVICE_NAME, 'create')
+  private create(createProjectDto: CreateProjectRequest) {
     return this.projectsService.create(createProjectDto);
   }
 
-  @Get()
-  findAll() {
+  @GrpcMethod(PROJECT_SERVICE_NAME, 'findAll')
+  private findAll(): Promise<FindAllResponse> {
     return this.projectsService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.projectsService.findOne(id);
+  @GrpcMethod(PROJECT_SERVICE_NAME, 'findOne')
+  private findOne(payload: FindOneProjectRequest) {
+    return this.projectsService.findOne(payload);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProjectDto: UpdateProjectDto) {
-    return this.projectsService.update(id, updateProjectDto);
+  @GrpcMethod(PROJECT_SERVICE_NAME, 'update')
+  private update({ id, data }: UpdateRequest) {
+    return this.projectsService.update({
+      id,
+      payload: data as UpdateProjectDto,
+    });
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.projectsService.remove(id);
+  @GrpcMethod(PROJECT_SERVICE_NAME, 'remove')
+  private remove(payload: RemoveProjectRequest) {
+    return this.projectsService.remove(payload);
   }
 
-  @Get(':id/tasks')
-  findAllTaskOfProject(@Param('id') id: string) {
-    return this.projectsService.findAllTaskOfProject(id);
+  @GrpcMethod(PROJECT_SERVICE_NAME, 'findAllTaskOfProject')
+  private findAllTaskOfProject(payload: FindAllTaskOfProjectRequest) {
+    return this.projectsService.findAllTaskOfProject(payload);
   }
-
 }

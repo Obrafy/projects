@@ -20,8 +20,8 @@ import { TasksModule } from 'src/tasks/tasks.module';
       {
         name: Address.name,
         schema: AddressSchema,
-      }
-    ])
+      },
+    ]),
   ],
 })
-export class ProjectsModule { }
+export class ProjectsModule {}
