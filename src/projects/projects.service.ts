@@ -41,7 +41,7 @@ export class ProjectsService {
     const tasksCreated = await Promise.all(
       tasks.map(async (task) => {
         const taskCreated = await this.tasksService.create(task);
-        return { task: taskCreated._id };
+        return { task: taskCreated.data.id };
       }),
     );
 
