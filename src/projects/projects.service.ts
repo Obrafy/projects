@@ -10,14 +10,7 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Address, AddressDocument } from './entities/address.entity';
 import { TasksService } from 'src/tasks/tasks.service';
-import {
-  FindAllResponse,
-  FindAllTaskOfProjectResponse,
-  FindOneResponse,
-  ProjectCreateResponse,
-  RemoveResponse,
-  UpdateResponse,
-} from './dto/proto/project.pb';
+import { AppError } from 'src/common/errors/AppError';
 
 @Injectable()
 export class ProjectsService {
@@ -27,13 +20,13 @@ export class ProjectsService {
     private readonly projectModel: Model<ProjectDocument>,
     @InjectModel(Address.name)
     private readonly addressModel: Model<AddressDocument>,
-  ) {}
+  ) { }
 
   private readonly logger = new Logger(ProjectsService.name);
 
   public async create(
     createProjectDto: CreateProjectRequest,
-  ): Promise<ProjectCreateResponse> {
+  ) {
     this.logger.log('Creating new project');
 
     const { address, tasks } = createProjectDto;
@@ -45,89 +38,52 @@ export class ProjectsService {
       }),
     );
 
-    const project = new this.projectModel({
+    await this.projectModel.create({
       ...createProjectDto,
       tasks: tasksCreated,
     });
 
-    const addressOfProject = new this.addressModel(address);
-    addressOfProject.save();
-    project.save();
+    await this.addressModel.create(address);
+
 
     return { status: HttpStatus.CREATED, error: null };
   }
 
-  public async findAll(): Promise<FindAllResponse> {
+  public async findAll() {
     this.logger.log('Find all Projects');
     const queryResult = await this.projectModel.find().exec();
 
-    const result = queryResult.map((project: ProjectDocument) => {
-      return {
-        status: project.status,
-        startDate: new Date(project.startDate).getTime(),
-        expectedFinishedDate: new Date(project.startDate).getTime(),
-        responsible: project.responsible,
-        address: project.address,
-        /** repeated ProjectTasks tasks = 7; */
-        id: project._id,
-      };
-    });
-
+    const result = queryResult.map((project) => this.MakeProjectResponse(project))
     return { status: HttpStatus.OK, error: null, data: result };
   }
 
   public async findOne({
     id,
-  }: FindOneProjectRequest): Promise<FindOneResponse> {
+  }: FindOneProjectRequest) {
     this.logger.log('Find one  by id', id);
     const project = await this.projectModel.findOne({ _id: id });
 
     if (!project) {
-      return {
-        status: HttpStatus.BAD_REQUEST,
-        error: 'Not found',
-        data: undefined,
-      };
+      throw new AppError('Not found')
     }
 
-    const result = {
-      status: project.status,
-      startDate: new Date(project.startDate).getTime(),
-      expectedFinishedDate: new Date(project.startDate).getTime(),
-      responsible: project.responsible,
-      address: project.address,
-      /** repeated ProjectTasks tasks = 7; */
-      id: project._id,
-    };
+    const result = this.MakeProjectResponse(project);
     return { status: HttpStatus.OK, error: null, data: result };
   }
 
-  public async update({ id, payload }): Promise<UpdateResponse> {
+  public async update({ id, payload }) {
     await this.projectModel.findOneAndUpdate({ _id: id }, payload);
     const project = await this.projectModel.findById({ _id: id });
 
     if (!project) {
-      return {
-        status: HttpStatus.BAD_REQUEST,
-        error: 'Not found',
-        data: undefined,
-      };
+      throw new AppError('Not found')
     }
 
-    const result = {
-      status: project.status,
-      startDate: new Date(project.startDate).getTime(),
-      expectedFinishedDate: new Date(project.startDate).getTime(),
-      responsible: project.responsible,
-      address: project.address,
-      /** repeated ProjectTasks tasks = 7; */
-      id: project._id,
-    };
-
+    const result = this.MakeProjectResponse(project);
     return { status: HttpStatus.OK, error: null, data: result };
   }
 
-  public async remove({ id }: RemoveProjectRequest): Promise<RemoveResponse> {
+  public async remove({ id }: RemoveProjectRequest) {
     this.logger.log('Remove Project by ID', id);
     await this.projectModel.findOneAndDelete({ _id: id });
 
@@ -136,7 +92,7 @@ export class ProjectsService {
 
   public async findAllTaskOfProject({
     id,
-  }: FindAllTaskOfProjectRequest): Promise<FindAllTaskOfProjectResponse> {
+  }: FindAllTaskOfProjectRequest) {
     this.logger.log('Find Tasks one project by id', id);
     const project = await (
       await this.projectModel.findOne({ _id: id }, { tasks: 1 })
@@ -145,11 +101,7 @@ export class ProjectsService {
     });
 
     if (!project) {
-      return {
-        status: HttpStatus.BAD_REQUEST,
-        error: 'Not found',
-        data: undefined,
-      };
+      throw new AppError('Not found')
     }
 
     const result = project.tasks.map((item) => {
@@ -161,6 +113,18 @@ export class ProjectsService {
       };
     });
 
-    return { status: HttpStatus.OK, error: null, data: result };
+    return result
+  }
+
+  private MakeProjectResponse(project: Project & import("mongoose").Document<any, any, any> & { _id: any; }) {
+    return {
+      status: project.status,
+      startDate: new Date(project.startDate).getTime(),
+      expectedFinishedDate: new Date(project.startDate).getTime(),
+      responsible: project.responsible,
+      address: project.address,
+      /** repeated ProjectTasks tasks = 7; */
+      id: project._id,
+    };
   }
 }
