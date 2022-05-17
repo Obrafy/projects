@@ -12,7 +12,7 @@ export class ProjectTasks extends Document {
       category: { type: String },
       activity: { type: String },
       noiseLevel: { type: String },
-      dirtyLevel: { type: String },
+      dirtLevel: { type: String },
     }),
   )
   fieldsOverwriters: Record<string, any>;
