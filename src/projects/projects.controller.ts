@@ -1,6 +1,6 @@
-import { Controller, Inject } from '@nestjs/common';
+import { Controller, HttpStatus, Inject } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
-
+import { makeResponse } from 'src/common/service/makeResponse';
 import {
   CreateProjectRequest,
   FindAllTaskOfProjectRequest,
@@ -8,7 +8,7 @@ import {
   RemoveProjectRequest,
   UpdateRequest,
 } from './dto/project.dto';
-import { FindAllResponse, PROJECT_SERVICE_NAME } from './dto/proto/project.pb';
+import { FindAllResponse, FindAllTaskOfProjectResponse, FindOneResponse, ProjectCreateResponse, PROJECT_SERVICE_NAME, RemoveResponse, UpdateResponse } from './dto/proto/project.pb';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { ProjectsService } from './projects.service';
 
@@ -18,35 +18,40 @@ export class ProjectsController {
   private readonly projectsService: ProjectsService;
 
   @GrpcMethod(PROJECT_SERVICE_NAME, 'create')
-  private create(createProjectDto: CreateProjectRequest) {
+  private create(createProjectDto: CreateProjectRequest): Promise<ProjectCreateResponse> {
     return this.projectsService.create(createProjectDto);
   }
 
   @GrpcMethod(PROJECT_SERVICE_NAME, 'findAll')
-  private findAll(): Promise<FindAllResponse> {
-    return this.projectsService.findAll();
+  private async findAll(): Promise<FindAllResponse> {
+    const result = await this.projectsService.findAll();
+    return makeResponse(HttpStatus.OK, null, result)
   }
 
   @GrpcMethod(PROJECT_SERVICE_NAME, 'findOne')
-  private findOne(payload: FindOneProjectRequest) {
-    return this.projectsService.findOne(payload);
+  private async findOne(payload: FindOneProjectRequest): Promise<FindOneResponse> {
+    const result = await this.projectsService.findOne(payload);
+    return makeResponse(HttpStatus.OK, null, result)
   }
 
   @GrpcMethod(PROJECT_SERVICE_NAME, 'update')
-  private update({ id, data }: UpdateRequest) {
-    return this.projectsService.update({
+  private async update({ id, data }: UpdateRequest): Promise<UpdateResponse> {
+    const result = await this.projectsService.update({
       id,
       payload: data as UpdateProjectDto,
     });
+    return makeResponse(HttpStatus.OK, null, result)
   }
 
   @GrpcMethod(PROJECT_SERVICE_NAME, 'remove')
-  private remove(payload: RemoveProjectRequest) {
-    return this.projectsService.remove(payload);
+  private async remove(payload: RemoveProjectRequest): Promise<RemoveResponse> {
+    await this.projectsService.remove(payload);
+    return makeResponse(HttpStatus.OK, null, null)
   }
 
   @GrpcMethod(PROJECT_SERVICE_NAME, 'findAllTaskOfProject')
-  private findAllTaskOfProject(payload: FindAllTaskOfProjectRequest) {
-    return this.projectsService.findAllTaskOfProject(payload);
+  private async findAllTaskOfProject(payload: FindAllTaskOfProjectRequest): Promise<FindAllTaskOfProjectResponse> {
+    const result = await this.projectsService.findAllTaskOfProject(payload);
+    return makeResponse(HttpStatus.OK, null, result)
   }
 }

@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import {
   CreateProjectRequest,
   FindOneProjectRequest,
@@ -10,7 +10,6 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Address, AddressDocument } from './entities/address.entity';
 import { TasksService } from 'src/tasks/tasks.service';
-import { AppError } from 'src/common/errors/AppError';
 
 @Injectable()
 export class ProjectsService {
@@ -34,7 +33,7 @@ export class ProjectsService {
     const tasksCreated = await Promise.all(
       tasks.map(async (task) => {
         const taskCreated = await this.tasksService.create(task);
-        return { task: taskCreated.data.id };
+        return { task: taskCreated.id };
       }),
     );
 
@@ -54,7 +53,7 @@ export class ProjectsService {
     const queryResult = await this.projectModel.find().exec();
 
     const result = queryResult.map((project) => this.MakeProjectResponse(project))
-    return { status: HttpStatus.OK, error: null, data: result };
+    return result
   }
 
   public async findOne({
@@ -64,11 +63,11 @@ export class ProjectsService {
     const project = await this.projectModel.findOne({ _id: id });
 
     if (!project) {
-      throw new AppError('Not found')
+      throw new NotFoundException()
     }
 
     const result = this.MakeProjectResponse(project);
-    return { status: HttpStatus.OK, error: null, data: result };
+    return result
   }
 
   public async update({ id, payload }) {
@@ -76,18 +75,16 @@ export class ProjectsService {
     const project = await this.projectModel.findById({ _id: id });
 
     if (!project) {
-      throw new AppError('Not found')
+      throw new NotFoundException()
     }
 
     const result = this.MakeProjectResponse(project);
-    return { status: HttpStatus.OK, error: null, data: result };
+    return result
   }
 
   public async remove({ id }: RemoveProjectRequest) {
     this.logger.log('Remove Project by ID', id);
     await this.projectModel.findOneAndDelete({ _id: id });
-
-    return { status: HttpStatus.OK, error: null };
   }
 
   public async findAllTaskOfProject({
@@ -101,7 +98,7 @@ export class ProjectsService {
     });
 
     if (!project) {
-      throw new AppError('Not found')
+      throw new NotFoundException()
     }
 
     const result = project.tasks.map((item) => {
