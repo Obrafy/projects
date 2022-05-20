@@ -12,6 +12,14 @@ export interface ProjectCreateRequest {
   responsible: string;
   address: Address | undefined;
   tasks: Task[];
+  status: ProjectCreateRequest_StatusType;
+}
+
+export enum ProjectCreateRequest_StatusType {
+  START = 0,
+  IN_PROGRESS = 1,
+  FINISHED = 2,
+  UNRECOGNIZED = -1,
 }
 
 export interface ProjectCreateResponse {
@@ -105,8 +113,36 @@ export interface FindAllTaskOfProjectResponse {
 export interface FindAllTaskOfProjectData {
   category: string;
   activity: string;
-  noiseLevel: string;
-  messLevel: string;
+  noiseLevel: FindAllTaskOfProjectData_LevelType;
+  dirtLevel: FindAllTaskOfProjectData_LevelType;
+  description: string;
+  unity: FindAllTaskOfProjectData_UnityType;
+  possibleSkills: PossibleSkills[];
+}
+
+export enum FindAllTaskOfProjectData_LevelType {
+  LOW = 0,
+  HIGH = 1,
+  UNRECOGNIZED = -1,
+}
+
+export enum FindAllTaskOfProjectData_UnityType {
+  VB = 0,
+  M2 = 1,
+  UNID = 2,
+  UNRECOGNIZED = -1,
+}
+
+export interface FieldsOverwritersRequest {
+  projectId: string;
+  taskId: string;
+  data: FieldsOverwriters | undefined;
+}
+
+export interface FieldsOverwritersResponse {
+  status: number;
+  error: string;
+  data: FieldsOverwriters | undefined;
 }
 
 /**  */
@@ -122,9 +158,24 @@ export interface Address {
 export interface Task {
   category: string;
   activity: string;
-  noiseLevel: string;
-  messLevel: string;
+  noiseLevel: Task_LevelType;
+  dirtLevel: Task_LevelType;
+  description: string;
+  unity: Task_UnityType;
   possibleSkills: PossibleSkills[];
+}
+
+export enum Task_LevelType {
+  LOW = 0,
+  HIGH = 1,
+  UNRECOGNIZED = -1,
+}
+
+export enum Task_UnityType {
+  VB = 0,
+  M2 = 1,
+  UNID = 2,
+  UNRECOGNIZED = -1,
 }
 
 export interface ProjectTasks {
@@ -138,10 +189,25 @@ export interface PossibleSkills {
 }
 
 export interface FieldsOverwriters {
-  category: string;
-  activity: string;
-  noiseLevel: string;
-  dirtyLevel: string;
+  category?: string | undefined;
+  activity?: string | undefined;
+  noiseLevel?: FieldsOverwriters_LevelType | undefined;
+  dirtLevel?: FieldsOverwriters_LevelType | undefined;
+  description?: string | undefined;
+  unity?: FieldsOverwriters_UnityType | undefined;
+}
+
+export enum FieldsOverwriters_LevelType {
+  LOW = 0,
+  HIGH = 1,
+  UNRECOGNIZED = -1,
+}
+
+export enum FieldsOverwriters_UnityType {
+  VB = 0,
+  M2 = 1,
+  UNID = 2,
+  UNRECOGNIZED = -1,
 }
 
 export const PROJECT_PACKAGE_NAME = 'project';
@@ -160,6 +226,10 @@ export interface ProjectServiceClient {
   findAllTaskOfProject(
     request: FindAllTaskOfProjectRequest,
   ): Observable<FindAllTaskOfProjectResponse>;
+
+  fieldsOverwriters(
+    request: FieldsOverwritersRequest,
+  ): Observable<FieldsOverwritersResponse>;
 }
 
 export interface ProjectServiceController {
@@ -192,6 +262,13 @@ export interface ProjectServiceController {
     | Promise<FindAllTaskOfProjectResponse>
     | Observable<FindAllTaskOfProjectResponse>
     | FindAllTaskOfProjectResponse;
+
+  fieldsOverwriters(
+    request: FieldsOverwritersRequest,
+  ):
+    | Promise<FieldsOverwritersResponse>
+    | Observable<FieldsOverwritersResponse>
+    | FieldsOverwritersResponse;
 }
 
 export function ProjectServiceControllerMethods() {
@@ -203,6 +280,7 @@ export function ProjectServiceControllerMethods() {
       'update',
       'remove',
       'findAllTaskOfProject',
+      'fieldsOverwriters',
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(

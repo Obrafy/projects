@@ -10,9 +10,24 @@ export const protobufPackage = 'task';
 export interface CreateRequest {
   category: string;
   activity: string;
-  noiseLevel: string;
-  messLevel: string;
+  noiseLevel: CreateRequest_LevelType;
+  dirtLevel: CreateRequest_LevelType;
+  description: string;
+  unity: CreateRequest_UnityType;
   possibleSkills: PossibleSkills[];
+}
+
+export enum CreateRequest_LevelType {
+  LOW = 0,
+  HIGH = 1,
+  UNRECOGNIZED = -1,
+}
+
+export enum CreateRequest_UnityType {
+  VB = 0,
+  M2 = 1,
+  UNID = 2,
+  UNRECOGNIZED = -1,
 }
 
 export interface CreateResponse {
@@ -67,7 +82,7 @@ export interface TaskDataResponse {
   category: string;
   activity: string;
   noiseLevel: string;
-  messLevel: string;
+  dirtLevel: string;
   possibleSkills: PossibleSkills[];
   id: string;
 }
@@ -76,7 +91,7 @@ export interface TaskDataRequest {
   category: string;
   activity: string;
   noiseLevel: string;
-  messLevel: string;
+  dirtLevel: string;
   possibleSkills: PossibleSkills[];
   id: string;
 }
