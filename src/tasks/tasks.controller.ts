@@ -1,6 +1,12 @@
-import { Controller, Inject } from '@nestjs/common';
+import { Controller, HttpStatus, Inject } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
-import { FindAllResponse, TASK_SERVICE_NAME } from './dto/proto/task.pb';
+import {
+  CreateResponse,
+  FindAllResponse,
+  FindOneResponse,
+  TASK_SERVICE_NAME,
+  UpdateResponse,
+} from './dto/proto/task.pb';
 import { TasksService } from './tasks.service';
 
 import {
@@ -17,30 +23,38 @@ export class TasksController {
   private readonly tasksService: TasksService;
 
   @GrpcMethod(TASK_SERVICE_NAME, 'create')
-  private create(createTaskDto: CreateTaskDto) {
-    return this.tasksService.create(createTaskDto);
+  private async create(createTaskDto: CreateTaskDto): Promise<CreateResponse> {
+    const result = await this.tasksService.create(createTaskDto);
+    return { status: HttpStatus.OK, error: null, data: result };
   }
+  '';
 
   @GrpcMethod(TASK_SERVICE_NAME, 'findAll')
-  private findAll(): Promise<FindAllResponse> {
-    return this.tasksService.findAll();
+  private async findAll(): Promise<FindAllResponse> {
+    const result = await this.tasksService.findAll();
+    return { status: HttpStatus.OK, error: null, data: result };
   }
 
   @GrpcMethod(TASK_SERVICE_NAME, 'findOne')
-  private findOne(payload: FindOneTaskRequest) {
-    return this.tasksService.findOne(payload);
+  private async findOne(payload: FindOneTaskRequest): Promise<FindOneResponse> {
+    const result = await this.tasksService.findOne(payload);
+    return { status: HttpStatus.OK, error: null, data: result };
   }
 
   @GrpcMethod(TASK_SERVICE_NAME, 'update')
-  private update({ id, data }: UpdateRequest) {
-    return this.tasksService.update({
+  private async update({ id, data }: UpdateRequest): Promise<UpdateResponse> {
+    const result = await this.tasksService.update({
       id,
       payload: data as UpdateTaskDto,
     });
+
+    return { status: HttpStatus.OK, error: null, data: result };
   }
 
   @GrpcMethod(TASK_SERVICE_NAME, 'remove')
-  private remove(payload: RemoveTaskRequest) {
-    return this.tasksService.remove(payload);
+  private async remove(payload: RemoveTaskRequest) {
+    await this.tasksService.remove(payload);
+
+    return { status: HttpStatus.OK, error: null };
   }
 }
