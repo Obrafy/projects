@@ -13,6 +13,8 @@ export class ProjectTasks extends Document {
       activity: { type: String },
       noiseLevel: { type: String },
       dirtLevel: { type: String },
+      description: { type: String },
+      unity: { type: String },
     }),
   )
   fieldsOverwriters: Record<string, any>;
