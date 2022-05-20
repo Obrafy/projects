@@ -4,8 +4,14 @@ import { Document } from 'mongoose';
 export type TaskDocument = Task & Document;
 
 enum LevelType {
-  LOW = 'LOW',
-  HIGH = 'HIGH',
+  'LOW' = 0,
+  'HIGH' = 1,
+}
+
+enum UnityType {
+  'VB' = 0,
+  'M²' = 1,
+  'UNID' = 2,
 }
 
 class PossibleSkills {
@@ -23,11 +29,17 @@ export class Task {
   @Prop()
   activity: string;
 
+  @Prop()
+  description: string;
+
   @Prop({ type: String, enum: LevelType, default: LevelType.LOW })
   noiseLevel: string;
 
   @Prop({ type: String, enum: LevelType, default: LevelType.LOW })
-  messLevel: string;
+  dirtLevel: string;
+
+  @Prop({ type: String, enum: UnityType, default: UnityType.VB })
+  unity: string;
 
   @Prop({ required: true })
   possibleSkills: PossibleSkills[];
