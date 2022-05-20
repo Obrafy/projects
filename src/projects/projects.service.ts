@@ -1,4 +1,9 @@
-import { HttpStatus, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  HttpStatus,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   CreateProjectRequest,
   FindOneProjectRequest,
@@ -19,23 +24,21 @@ export class ProjectsService {
     private readonly projectModel: Model<ProjectDocument>,
     @InjectModel(Address.name)
     private readonly addressModel: Model<AddressDocument>,
-  ) { }
+  ) {}
 
   private readonly logger = new Logger(ProjectsService.name);
 
-  public async create(
-    createProjectDto: CreateProjectRequest,
-  ) {
+  public async create(createProjectDto: CreateProjectRequest) {
     this.logger.log('Creating new project');
 
     const { address, tasks } = createProjectDto;
 
-    const tasksCreated = await Promise.all(
-      tasks.map(async (task) => {
-        const taskCreated = await this.tasksService.create(task);
-        return { task: taskCreated.id };
-      }),
-    );
+    const allTasks = tasks.map(async (task) => {
+      const taskCreated = await this.tasksService.create(task);
+      return { task: taskCreated.id };
+    });
+
+    const tasksCreated = await Promise.all(allTasks);
 
     await this.projectModel.create({
       ...createProjectDto,
@@ -44,7 +47,6 @@ export class ProjectsService {
 
     await this.addressModel.create(address);
 
-
     return { status: HttpStatus.CREATED, error: null };
   }
 
@@ -52,22 +54,22 @@ export class ProjectsService {
     this.logger.log('Find all Projects');
     const queryResult = await this.projectModel.find().exec();
 
-    const result = queryResult.map((project) => this.MakeProjectResponse(project))
-    return result
+    const result = queryResult.map((project) =>
+      this.MakeProjectResponse(project),
+    );
+    return result;
   }
 
-  public async findOne({
-    id,
-  }: FindOneProjectRequest) {
+  public async findOne({ id }: FindOneProjectRequest) {
     this.logger.log('Find one  by id', id);
     const project = await this.projectModel.findOne({ _id: id });
 
     if (!project) {
-      throw new NotFoundException()
+      throw new NotFoundException();
     }
 
     const result = this.MakeProjectResponse(project);
-    return result
+    return result;
   }
 
   public async update({ id, payload }) {
@@ -75,11 +77,11 @@ export class ProjectsService {
     const project = await this.projectModel.findById({ _id: id });
 
     if (!project) {
-      throw new NotFoundException()
+      throw new NotFoundException();
     }
 
     const result = this.MakeProjectResponse(project);
-    return result
+    return result;
   }
 
   public async remove({ id }: RemoveProjectRequest) {
@@ -87,9 +89,7 @@ export class ProjectsService {
     await this.projectModel.findOneAndDelete({ _id: id });
   }
 
-  public async findAllTaskOfProject({
-    id,
-  }: FindAllTaskOfProjectRequest) {
+  public async findAllTaskOfProject({ id }: FindAllTaskOfProjectRequest) {
     this.logger.log('Find Tasks one project by id', id);
     const project = await (
       await this.projectModel.findOne({ _id: id }, { tasks: 1 })
@@ -98,7 +98,7 @@ export class ProjectsService {
     });
 
     if (!project) {
-      throw new NotFoundException()
+      throw new NotFoundException();
     }
 
     const result = project.tasks.map((item) => {
@@ -106,14 +106,32 @@ export class ProjectsService {
         category: item.task.category,
         activity: item.task.activity,
         noiseLevel: item.task.noiseLevel,
-        messLevel: item.task.messLevel,
+        dirtLevel: item.task.dirtLevel,
+        description: item.task.description,
+        unity: item.task.unity,
       };
     });
 
-    return result
+    return result;
   }
 
-  private MakeProjectResponse(project: Project & import("mongoose").Document<any, any, any> & { _id: any; }) {
+  public async fieldsOverwriters({ projectId, taskId, payload }) {
+    await this.projectModel.updateOne(
+      {
+        _id: projectId,
+        'tasks.task': taskId,
+      },
+      { $set: { 'tasks.$.fieldsOverwrite': payload } },
+    );
+
+    const project = await this.projectModel.findOne({ _id: projectId });
+    return this.MakeProjectResponse(project);
+  }
+
+  private MakeProjectResponse(
+    project: Project &
+      import('mongoose').Document<any, any, any> & { _id: any },
+  ) {
     return {
       status: project.status,
       startDate: new Date(project.startDate).getTime(),
