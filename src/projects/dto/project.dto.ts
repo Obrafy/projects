@@ -6,7 +6,7 @@ import {
   ValidateNested,
   IsObject,
 } from 'class-validator';
-import { Task } from 'src/tasks/entities/task.entity';
+import { CreateTaskDto } from 'src/tasks/dto/create-task.dto';
 
 class Address {
   @IsString()
@@ -44,9 +44,10 @@ export class CreateProjectRequest {
   @ValidateNested()
   address: Address;
 
-  @IsNotEmpty()
+  @Type(() => CreateTaskDto)
   @ValidateNested()
-  tasks: Task[];
+  @IsNotEmpty()
+  tasks: CreateTaskDto[];
 }
 
 export class FindOneProjectRequest {
@@ -70,4 +71,32 @@ export class RemoveProjectRequest {
 export class FindAllTaskOfProjectRequest {
   @IsString()
   public readonly id: string;
+}
+
+class FieldsOverwrite {
+  @IsString()
+  category: string;
+  @IsString()
+  activity: string;
+  @IsString()
+  description: string;
+  @IsString()
+  noiseLevel: string;
+  @IsString()
+  dirtLevel: string;
+  @IsString()
+  unity: string;
+}
+
+export class FieldsOverwritersRequest {
+  @IsString()
+  public readonly projectId: string;
+
+  @IsString()
+  public readonly taskId: string;
+
+  @Type(() => FieldsOverwrite)
+  @ValidateNested()
+  // @IsNotEmpty()
+  public readonly data: FieldsOverwrite;
 }

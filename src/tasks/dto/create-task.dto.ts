@@ -26,7 +26,13 @@ export class CreateTaskDto {
   noiseLevel: string;
 
   @IsString()
-  messLevel: string;
+  dirtLevel: string;
+
+  @IsString()
+  description: string;
+
+  @IsString()
+  unity: string;
 
   @IsArray()
   @IsNotEmpty()
