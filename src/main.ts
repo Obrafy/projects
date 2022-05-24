@@ -14,8 +14,20 @@ async function bootstrap() {
         url: `${process.env.HOST}:${process.env.PORT}`,
         package: ['project', 'task'],
         protoPath: [
-          join('node_modules', 'proto', 'proto-files', 'project.proto'),
-          join('node_modules', 'proto', 'proto-files', 'task.proto'),
+          join(
+            'node_modules',
+            'proto',
+            'proto-files',
+            'project-service',
+            'project.proto',
+          ),
+          join(
+            'node_modules',
+            'proto',
+            'proto-files',
+            'task-service',
+            'task.proto',
+          ),
         ],
       },
     },

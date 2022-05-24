@@ -17,5 +17,5 @@ export class ProjectTasks extends Document {
       unity: { type: String },
     }),
   )
-  fieldsOverwriters: Record<string, any>;
+  fieldsOverrides: Record<string, any>;
 }

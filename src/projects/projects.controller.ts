@@ -3,7 +3,7 @@ import { GrpcMethod } from '@nestjs/microservices';
 import { makeResponse } from 'src/common/service/makeResponse';
 import {
   CreateProjectRequest,
-  FieldsOverwritersRequest,
+  FieldsOverridesRequest,
   FindAllTaskOfProjectRequest,
   FindOneProjectRequest,
   RemoveProjectRequest,
@@ -70,13 +70,13 @@ export class ProjectsController {
     return makeResponse(HttpStatus.OK, null, result);
   }
 
-  @GrpcMethod(PROJECT_SERVICE_NAME, 'fieldsOverwriters')
-  private async fieldsOverwriters({
+  @GrpcMethod(PROJECT_SERVICE_NAME, 'fieldsOverrides')
+  private async fieldsOverrides({
     projectId,
     taskId,
     data,
-  }: FieldsOverwritersRequest): Promise<FindAllTaskOfProjectResponse> {
-    const result = await this.projectsService.fieldsOverwriters({
+  }: FieldsOverridesRequest): Promise<FindAllTaskOfProjectResponse> {
+    const result = await this.projectsService.fieldsOverrides({
       projectId,
       taskId,
       payload: data,
