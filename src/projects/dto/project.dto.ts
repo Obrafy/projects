@@ -72,8 +72,7 @@ export class FindAllTaskOfProjectRequest {
   @IsString()
   public readonly id: string;
 }
-
-class FieldsOverwrite {
+class FieldsOverrides {
   @IsString()
   category: string;
   @IsString()
@@ -88,15 +87,15 @@ class FieldsOverwrite {
   unity: string;
 }
 
-export class FieldsOverwritersRequest {
+export class FieldsOverridesRequest {
   @IsString()
   public readonly projectId: string;
 
   @IsString()
   public readonly taskId: string;
 
-  @Type(() => FieldsOverwrite)
+  @Type(() => FieldsOverrides)
   @ValidateNested()
   // @IsNotEmpty()
-  public readonly data: FieldsOverwrite;
+  public readonly data: FieldsOverrides;
 }
