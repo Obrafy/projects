@@ -12,7 +12,7 @@ async function bootstrap() {
       transport: Transport.GRPC,
       options: {
         url: `${process.env.HOST}:${process.env.PORT}`,
-        package: ['project', 'task'],
+        package: ['project'],
         protoPath: [
           join(
             'node_modules',
@@ -20,13 +20,6 @@ async function bootstrap() {
             'proto-files',
             'project-service',
             'project.proto',
-          ),
-          join(
-            'node_modules',
-            'proto',
-            'proto-files',
-            'task-service',
-            'task.proto',
           ),
         ],
       },
