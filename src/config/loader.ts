@@ -9,4 +9,7 @@ export default (): ConfigInterface => ({
   DB_PASSWORD: process.env.DB_PASSWORD,
   DB_URI: process.env.DB_URI,
   DB_USER: process.env.DB_USER,
+
+  AUTHENTICATION_HOST: process.env.AUTHENTICATION_HOST,
+  AUTHENTICATION_PORT: parseInt(process.env.AUTHENTICATION_PORT, 10),
 });

@@ -12,4 +12,7 @@ export default Joi.object<ConfigInterface>({
   DB_PASSWORD: Joi.string(),
   DB_URI: Joi.string().uri(),
   DB_USER: Joi.string(),
+
+  AUTHENTICATION_HOST: Joi.string(),
+  AUTHENTICATION_PORT: Joi.number(),
 });
