@@ -7,6 +7,9 @@ export class ProjectTasks extends Document {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Task' })
   task: Task;
 
+  @Prop()
+  laborers: string[];
+
   @Prop(
     raw({
       category: { type: String },
