@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import { Status } from 'src/common/dto/status.enum';
 
 export type TaskDocument = Task & Document;
 
@@ -23,6 +24,10 @@ class PossibleSkills {
 }
 @Schema()
 export class Task {
+
+  @Prop({ required: false, default: Status.ACTIVE })
+  status: Status;
+
   @Prop()
   category: string;
 
