@@ -9,15 +9,26 @@ import {
   ValidateNested,
 } from 'class-validator';
 import {
-  LevelType,
   TaskCreateRequest,
   TaskFindAllRequest,
   TaskFindOneRequest,
   TaskRemoveRequest,
   TaskUpdateRequest,
-  UnityType,
   TaskUpdateData,
-} from 'src/common/proto/project.pb';
+  PossibleSkills
+} from 'src/common/dto/proto/project.pb';
+
+enum LevelType {
+  'LOW' = 'LOW',
+  'HIGH' = 'HIGH',
+}
+
+enum UnityType {
+  'VB' = 'VB',
+  'M2' = 'M²',
+  'UNID' = 'UNID',
+}
+
 export class TaskCreateRequestDto implements TaskCreateRequest {
   @IsNotEmpty()
   category: string;
@@ -40,11 +51,11 @@ export class TaskCreateRequestDto implements TaskCreateRequest {
   @IsArray()
   laborers: string[];
 
-  @Type(() => PossibleSkills)
+  @Type(() => PossibleSkillsDto)
   @ValidateNested()
-  possibleSkills: PossibleSkills[];
+  possibleSkills: PossibleSkillsDto[];
 }
-class PossibleSkills {
+class PossibleSkillsDto implements PossibleSkills {
   @IsString()
   skillId: string;
 
@@ -98,5 +109,7 @@ export class TaskDto {
   @IsOptional()
   unity: UnityType;
 
-  possibleSkills: PossibleSkills[];
+  @Type(() => PossibleSkillsDto)
+  @ValidateNested()
+  possibleSkills: PossibleSkillsDto[];
 }
