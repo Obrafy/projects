@@ -221,8 +221,8 @@ export interface TaskCreateRequest {
 /** Response */
 export interface TaskCreateResponse {
   status: number;
-  error: string;
-  data: TaskData | undefined;
+  error: string[];
+  data: TaskResponseData | undefined;
 }
 
 /**
@@ -234,8 +234,8 @@ export interface TaskFindAllRequest {}
 /** Response */
 export interface TaskFindAllResponse {
   status: number;
-  error: string;
-  data: TaskData[];
+  error: string[];
+  data: TaskResponseData[];
 }
 
 /**
@@ -249,8 +249,8 @@ export interface TaskFindOneRequest {
 /** Response */
 export interface TaskFindOneResponse {
   status: number;
-  error: string;
-  data: TaskData | undefined;
+  error: string[];
+  data: TaskResponseData | undefined;
 }
 
 /**
@@ -265,8 +265,8 @@ export interface TaskUpdateRequest {
 /** Response */
 export interface TaskUpdateResponse {
   status: number;
-  error: string;
-  data: TaskData | undefined;
+  error: string[];
+  data: TaskResponseData | undefined;
 }
 
 export interface TaskUpdateData {
@@ -287,19 +287,25 @@ export interface TaskRemoveRequest {
 /** Response */
 export interface TaskRemoveResponse {
   status: number;
-  error: string;
+  error: string[];
   data: TaskRemoveDataResponse | undefined;
 }
 
 export interface TaskRemoveDataResponse {}
 
-export interface TaskData {
+export interface TaskResponse {
   category: string;
   activity: string;
-  noiseLevel: string;
-  dirtLevel: string;
+  noiseLevel: LevelType;
+  dirtLevel: LevelType;
+  description: string;
+  unity: UnityType;
   possibleSkills: PossibleSkills[];
-  id: string;
+  status: Status;
+}
+
+export interface TaskResponseData {
+  task: TaskResponse | undefined;
 }
 
 export const PROJECT_PACKAGE_NAME = 'project';
