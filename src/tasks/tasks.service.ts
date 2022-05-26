@@ -1,78 +1,92 @@
 import { Model } from 'mongoose';
+import { ClientGrpc } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { CreateTaskDto } from './dto/create-task.dto';
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Task, TaskDocument } from './entities/task.entity';
-import { FindOneTaskRequest, RemoveTaskRequest } from './dto/task.dto';
+import * as DTO from '../tasks/dto/task.dto';
+import { firstValueFrom } from 'rxjs';
+import { SkillManagementServiceClient, SKILL_MANAGEMENT_SERVICE_NAME } from 'src/common/dto/proto/auth.pb';
+import { TASK_ERROR_MESSAGES_KEYS } from 'src/common/error-messages/error-messagens.interface';
+import * as EXCEPTIONS from '@nestjs/common/exceptions';
+import { Status } from 'src/common/dto/status.enum';
 
 @Injectable()
 export class TasksService {
   constructor(
     @InjectModel(Task.name) private readonly taskModel: Model<TaskDocument>,
-  ) {}
+    @Inject(SKILL_MANAGEMENT_SERVICE_NAME) private readonly grpcClient: ClientGrpc,
+  ) { }
+
+  // Private Methods
+
+  /**
+   * Get an user by id
+   * @param projectId The Project's id
+   * @returns The response Project object
+   */
+  private async _getTaskById(taskId: string): Promise<TaskDocument> {
+    return this.taskModel.findOne({ _id: taskId });
+  }
+
+  private skillManagementServiceClient: SkillManagementServiceClient;
+
+  public onModuleInit(): void {
+    this.skillManagementServiceClient =
+      this.grpcClient.getService<SkillManagementServiceClient>(SKILL_MANAGEMENT_SERVICE_NAME);
+  }
 
   private readonly logger = new Logger(TasksService.name);
 
-  public async create(createTaskDto: CreateTaskDto) {
+  public async create(createTaskDto: DTO.TaskCreateRequestDto): Promise<TaskDocument> {
     this.logger.log('Creating new task');
 
-    // TODO - find Skill by id before create Task
-    const task = await this.taskModel.create(createTaskDto);
-    const result = this.MakeTaskResponse(task);
-    return result;
+    const checkSkillPromises = createTaskDto.possibleSkills.map(async (skill) => {
+      const skillId: string = skill.skillId;
+      const { status } = await firstValueFrom(this.skillManagementServiceClient.findSkillById({ skillId }))
+      if (status === 404) throw new NotFoundException();
+    });
+
+    await Promise.all(checkSkillPromises);
+
+    return await this.taskModel.create(createTaskDto);
   }
 
-  public async findAll() {
+  public async findAll(): Promise<TaskDocument[]> {
     this.logger.log('Find all Tasks');
 
-    const queryResult = await this.taskModel.find().exec();
+    const tasks = await this.taskModel.find().exec();
 
-    const result = queryResult.map((task) => this.MakeTaskResponse(task));
-    return result;
+    return tasks
   }
 
-  public async findOne({ id }: FindOneTaskRequest) {
+  public async findOne({ id }: DTO.TaskFindOneRequestDto): Promise<TaskDocument> {
     this.logger.log('Find task by id', id);
 
-    const task = await this.taskModel.findOne({ _id: id });
+    const task = await this._getTaskById(id)
 
-    if (!task) {
-      throw new NotFoundException();
-    }
+    if (!task) throw new EXCEPTIONS.NotFoundException(TASK_ERROR_MESSAGES_KEYS.TASK_NOT_FOUND);
 
-    const result = this.MakeTaskResponse(task);
-    return result;
+    return task;
   }
 
-  public async update({ id, payload }) {
-    await this.taskModel.findOneAndUpdate({ _id: id }, payload).exec();
-    const task = await this.taskModel.findById({ _id: id });
+  public async update({ id, data }: DTO.TaskUpdateRequestDto): Promise<TaskDocument> {
+    await this.taskModel.findOneAndUpdate({ _id: id }, data).exec();
 
-    if (!task) {
-      throw new NotFoundException();
-    }
+    const task = await this._getTaskById(id)
+    if (!task) throw new EXCEPTIONS.NotFoundException(TASK_ERROR_MESSAGES_KEYS.TASK_NOT_FOUND);
 
-    const result = this.MakeTaskResponse(task);
-    return result;
+    return task;
   }
 
-  public async remove({ id }: RemoveTaskRequest) {
+  public async remove({ id }: DTO.TaskRemoveRequestDto) {
     this.logger.log('Remove Task by ID', id);
-    await this.taskModel.findOneAndDelete({ _id: id });
+
+    const task = await this._getTaskById(id)
+    if (!task) throw new EXCEPTIONS.NotFoundException(TASK_ERROR_MESSAGES_KEYS.TASK_NOT_FOUND);
+
+    task.status = Status.DELETED;
+
+    await task.save()
   }
 
-  private MakeTaskResponse(
-    task: Task & import('mongoose').Document<any, any, any> & { _id: any },
-  ) {
-    return {
-      category: task.category,
-      activity: task.activity,
-      noiseLevel: task.noiseLevel,
-      dirtLevel: task.dirtLevel,
-      possibleSkills: task.possibleSkills,
-      description: task.description,
-      unity: task.unity,
-      id: task._id,
-    };
-  }
 }

@@ -1,60 +1,113 @@
 import { Controller, HttpStatus, Inject } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
-import {
-  CreateResponse,
-  FindAllResponse,
-  FindOneResponse,
-  TASK_SERVICE_NAME,
-  UpdateResponse,
-} from './dto/proto/task.pb';
 import { TasksService } from './tasks.service';
-
+import * as PROTO from '../common/dto/proto/project.pb';
 import {
-  FindOneTaskRequest,
-  RemoveTaskRequest,
-  UpdateRequest,
+  TaskCreateRequestDto,
+  TaskFindOneRequestDto,
+  TaskRemoveRequestDto,
+  TaskUpdateRequestDto,
 } from './dto/task.dto';
-import { CreateTaskDto } from './dto/create-task.dto';
-import { UpdateTaskDto } from './dto/update-task.dto';
-
+import makeResponse from 'src/common/helpers/make-response';
 @Controller()
 export class TasksController {
   @Inject(TasksService)
   private readonly tasksService: TasksService;
 
-  @GrpcMethod(TASK_SERVICE_NAME, 'create')
-  private async create(createTaskDto: CreateTaskDto): Promise<CreateResponse> {
-    const result = await this.tasksService.create(createTaskDto);
-    return { status: HttpStatus.OK, error: null, data: result };
-  }
-  '';
+  @GrpcMethod(PROTO.TASK_SERVICE_NAME, 'create')
+  private async create(
+    createTaskDto: TaskCreateRequestDto,
+  ): Promise<PROTO.TaskCreateResponse> {
+    const taskData = await this.tasksService.create(createTaskDto);
 
-  @GrpcMethod(TASK_SERVICE_NAME, 'findAll')
-  private async findAll(): Promise<FindAllResponse> {
-    const result = await this.tasksService.findAll();
-    return { status: HttpStatus.OK, error: null, data: result };
+    return makeResponse<PROTO.TaskCreateResponse>({
+      task: {
+        category: taskData.category,
+        activity: taskData.activity,
+        noiseLevel: taskData.noiseLevel,
+        dirtLevel: taskData.dirtLevel,
+        description: taskData.description,
+        unity: taskData.unity,
+        possibleSkills: taskData.possibleSkills,
+        status: taskData.status
+      }
+    })
+
   }
 
-  @GrpcMethod(TASK_SERVICE_NAME, 'findOne')
-  private async findOne(payload: FindOneTaskRequest): Promise<FindOneResponse> {
-    const result = await this.tasksService.findOne(payload);
-    return { status: HttpStatus.OK, error: null, data: result };
+  @GrpcMethod(PROTO.TASK_SERVICE_NAME, 'findAll')
+  private async findAll(): Promise<PROTO.TaskFindAllResponse> {
+    const tasksData = await this.tasksService.findAll();
+
+    const result = tasksData.map(task => {
+      return {
+        task: {
+          category: task.category,
+          activity: task.activity,
+          noiseLevel: task.noiseLevel,
+          dirtLevel: task.dirtLevel,
+          description: task.description,
+          unity: task.unity,
+          possibleSkills: task.possibleSkills,
+          status: task.status
+        }
+      }
+    })
+
+    return makeResponse<PROTO.TaskFindAllResponse>(result)
+
   }
 
-  @GrpcMethod(TASK_SERVICE_NAME, 'update')
-  private async update({ id, data }: UpdateRequest): Promise<UpdateResponse> {
-    const result = await this.tasksService.update({
+  @GrpcMethod(PROTO.TASK_SERVICE_NAME, 'findOne')
+  private async findOne(
+    payload: TaskFindOneRequestDto,
+  ): Promise<PROTO.TaskFindOneResponse> {
+    const taskData = await this.tasksService.findOne(payload);
+
+    return makeResponse<PROTO.TaskFindOneResponse>({
+      task: {
+        category: taskData.category,
+        activity: taskData.activity,
+        noiseLevel: taskData.noiseLevel,
+        dirtLevel: taskData.dirtLevel,
+        description: taskData.description,
+        unity: taskData.unity,
+        possibleSkills: taskData.possibleSkills,
+        status: taskData.status,
+      }
+    })
+  }
+
+  @GrpcMethod(PROTO.TASK_SERVICE_NAME, 'update')
+  private async update({
+    id,
+    data,
+  }: TaskUpdateRequestDto): Promise<PROTO.TaskUpdateResponse> {
+    const taskData = await this.tasksService.update({
       id,
-      payload: data as UpdateTaskDto,
+      data: data as PROTO.TaskUpdateData,
     });
 
-    return { status: HttpStatus.OK, error: null, data: result };
+    return makeResponse<PROTO.TaskFindOneResponse>({
+      task: {
+        category: taskData.category,
+        activity: taskData.activity,
+        noiseLevel: taskData.noiseLevel,
+        dirtLevel: taskData.dirtLevel,
+        description: taskData.description,
+        unity: taskData.unity,
+        possibleSkills: taskData.possibleSkills,
+        status: taskData.status
+      }
+    })
   }
 
-  @GrpcMethod(TASK_SERVICE_NAME, 'remove')
-  private async remove(payload: RemoveTaskRequest) {
+  @GrpcMethod(PROTO.TASK_SERVICE_NAME, 'remove')
+  private async remove(
+    payload: TaskRemoveRequestDto,
+  ): Promise<PROTO.TaskRemoveResponse> {
     await this.tasksService.remove(payload);
 
-    return { status: HttpStatus.OK, error: null };
+    return makeResponse<PROTO.TaskRemoveResponse>(null)
   }
 }
