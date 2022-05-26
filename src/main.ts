@@ -3,7 +3,9 @@ import { Transport } from '@nestjs/microservices';
 import { NestFactory } from '@nestjs/core';
 import { join } from 'path';
 import { AppModule } from './app.module';
-import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { CatchAllExceptionFilter } from './common/filters/http-exception.filter';
+import { ConfigService } from '@nestjs/config';
+import { ConfigInterface } from './config';
 
 async function bootstrap() {
   const app: INestMicroservice = await NestFactory.createMicroservice(
@@ -26,7 +28,8 @@ async function bootstrap() {
     },
   );
 
-  app.useGlobalFilters(new HttpExceptionFilter());
+  const config = app.get<ConfigService<ConfigInterface>>(ConfigService);
+  app.useGlobalFilters(new CatchAllExceptionFilter(config));
 
   // Validate and Transform Global Pipes
   app.useGlobalPipes(
