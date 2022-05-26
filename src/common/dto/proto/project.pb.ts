@@ -7,11 +7,12 @@ import { Observable } from 'rxjs';
 export const protobufPackage = 'project';
 
 /** All Enums */
-export enum StatusType {
-  START = 0,
-  IN_PROGRESS = 1,
-  FINISHED = 2,
-  DELETED = 3,
+export enum Status {
+  ACTIVE = 0,
+  INACTIVE = 1,
+  IN_PROGRESS = 2,
+  FINISHED = 3,
+  DELETED = 4,
   UNRECOGNIZED = -1,
 }
 
@@ -28,6 +29,10 @@ export enum UnityType {
   UNRECOGNIZED = -1,
 }
 
+export interface ProjectResponseData {
+  project: Project | undefined;
+}
+
 /**
  * Create Project
  * Request
@@ -38,13 +43,14 @@ export interface ProjectCreateRequest {
   responsible: string;
   address: Address | undefined;
   tasks: Task[];
-  status: StatusType;
+  status: Status;
 }
 
 /** Response */
 export interface ProjectCreateResponse {
   status: number;
-  error: string;
+  error: string[];
+  data: ProjectResponseData | undefined;
 }
 
 /** FindAll Project */
@@ -52,17 +58,8 @@ export interface ProjectFindAllRequest {}
 
 export interface ProjectFindAllResponse {
   status: number;
-  error: string;
-  data: FindAllData[];
-}
-
-export interface FindAllData {
-  status: string;
-  startDate: number;
-  expectedFinishedDate: number;
-  responsible: string;
-  address: Address | undefined;
-  id: string;
+  error: string[];
+  data: ProjectResponseData[];
 }
 
 export interface ProjectFindOneRequest {
@@ -71,17 +68,8 @@ export interface ProjectFindOneRequest {
 
 export interface ProjectFindOneResponse {
   status: number;
-  error: string;
-  data: FindOneData | undefined;
-}
-
-export interface FindOneData {
-  status: string;
-  startDate: number;
-  expectedFinishedDate: number;
-  responsible: string;
-  address: Address | undefined;
-  id: string;
+  error: string[];
+  data: ProjectResponseData | undefined;
 }
 
 /**
@@ -96,21 +84,12 @@ export interface ProjectUpdateRequest {
 /** Response */
 export interface ProjectUpdateResponse {
   status: number;
-  error: string;
-  data: UpdateData | undefined;
-}
-
-export interface UpdateData {
-  status: string;
-  startDate: number;
-  expectedFinishedDate: number;
-  responsible: string;
-  address: Address | undefined;
-  id: string;
+  error: string[];
+  data: ProjectResponseData | undefined;
 }
 
 export interface UpdateProjectData {
-  status?: StatusType | undefined;
+  status?: Status | undefined;
   startDate?: string | undefined;
   expectedFinishedDate?: string | undefined;
   responsible?: string | undefined;
@@ -127,7 +106,7 @@ export interface ProjectRemoveRequest {
 /** Response */
 export interface ProjectRemoveResponse {
   status: number;
-  error: string;
+  error: string[];
   data: RemoveData | undefined;
 }
 
@@ -144,7 +123,7 @@ export interface FindAllTaskOfProjectRequest {
 /** Response */
 export interface FindAllTaskOfProjectResponse {
   status: number;
-  error: string;
+  error: string[];
   data: FindAllTaskOfProjectData[];
 }
 
@@ -171,7 +150,7 @@ export interface FieldsOverridesRequest {
 /** Response */
 export interface FieldsOverridesResponse {
   status: number;
-  error: string;
+  error: string[];
   data: FieldsOverrides | undefined;
 }
 
@@ -182,6 +161,22 @@ export interface FieldsOverrides {
   dirtLevel?: LevelType | undefined;
   description?: string | undefined;
   unity?: UnityType | undefined;
+}
+
+export interface Project {
+  id: string;
+  startDate: number;
+  expectedFinishedDate: number;
+  responsible: string;
+  address: Address | undefined;
+  projectTask: ProjectTask[];
+  status: Status;
+}
+
+export interface ProjectTask {
+  task: string;
+  laborers: string[];
+  fieldsOverrides?: FieldsOverrides | undefined;
 }
 
 export interface Address {

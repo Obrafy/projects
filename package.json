@@ -20,8 +20,8 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "proto:install": "npm i https://github.com/obrafy/proto.git",
-    "proto:project": "protoc --plugin=node_modules/.bin/protoc-gen-ts_proto -I=./node_modules/proto/proto-files/project-service --ts_proto_out=src/common/proto node_modules/proto/proto-files/project-service/project.proto --ts_proto_opt=nestJs=true --ts_proto_opt=fileSuffix=.pb",
-    "proto:auth": "protoc --plugin=node_modules/.bin/protoc-gen-ts_proto -I=./node_modules/proto/proto-files/authentication-service --ts_proto_out=src/common/proto ./node_modules/proto/proto-files/authentication-service/auth.proto --ts_proto_opt=nestJs=true --ts_proto_opt=fileSuffix=.pb",
+    "proto:project": "protoc --plugin=node_modules/.bin/protoc-gen-ts_proto -I=./node_modules/proto/proto-files/project-service --ts_proto_out=src/common/dto/proto node_modules/proto/proto-files/project-service/project.proto --ts_proto_opt=nestJs=true --ts_proto_opt=fileSuffix=.pb",
+    "proto:auth": "protoc --plugin=node_modules/.bin/protoc-gen-ts_proto -I=./node_modules/proto/proto-files/authentication-service --ts_proto_out=src/common/dto/proto ./node_modules/proto/proto-files/authentication-service/auth.proto --ts_proto_opt=nestJs=true --ts_proto_opt=fileSuffix=.pb",
     "proto:all": " yarn proto:install && yarn proto:project && yarn proto:auth"
   },
   "dependencies": {
