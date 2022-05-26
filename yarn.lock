@@ -4234,7 +4234,7 @@
     "sisteransi" "^1.0.5"
 
 "proto@github:obrafy/proto":
-  "resolved" "git+ssh://git@github.com/obrafy/proto.git#0db841b9bcf4ff06c45cc42feb78f68aa657ad85"
+  "resolved" "git+ssh://git@github.com/obrafy/proto.git#03ac635c373db5b884d94992a6593ed76c530cd4"
   "version" "1.0.0"
 
 "protobufjs@^6.10.0", "protobufjs@^6.8.8":

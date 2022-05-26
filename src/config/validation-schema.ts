@@ -7,6 +7,8 @@ export default Joi.object<ConfigInterface>({
     .default('development'),
   PORT: Joi.number().default(3000),
 
+  SERVER_LANG: Joi.string().valid('pt-br', 'en-us').default('en-us'),
+
   DB_BASE_URI: Joi.string(),
   DB_NAME: Joi.string(),
   DB_PASSWORD: Joi.string(),
