@@ -24,9 +24,29 @@ export enum Status {
 
 /** User Message */
 export interface User {
+  id: string;
   email: string;
   lastLogin?: number | undefined;
   roles: Role[];
+  status: Status;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface SkillCategory {
+  id: string;
+  name: string;
+  description: string;
+  status: Status;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface Skill {
+  id: string;
+  name: string;
+  description: string;
+  skillCategoryId?: string | undefined;
   status: Status;
   createdAt: number;
   updatedAt: number;
@@ -197,29 +217,244 @@ export interface RemoveRoleFromUserResponse {
   data: RemoveRoleFromUserResponseData | undefined;
 }
 
-/** Skill */
-export interface SkillRequest {
+/**
+ * AddSkillCategory
+ * Request
+ */
+export interface AddSkillCategoryRequest {
+  name: string;
+  description: string;
+}
+
+/** Response */
+export interface AddSkillCategoryResponseData {
+  skillCategoryId: string;
+}
+
+export interface AddSkillCategoryResponse {
+  status: number;
+  error: string[];
+  data: AddSkillCategoryResponseData | undefined;
+}
+
+/**
+ * FindSkillCategoryById
+ * Request
+ */
+export interface FindSkillCategoryByIdRequest {
+  skillCategoryId: string;
+}
+
+/** Response */
+export interface FindSkillCategoryByIdResponseData {
+  skillCategory: SkillCategory | undefined;
+}
+
+export interface FindSkillCategoryByIdResponse {
+  status: number;
+  error: string[];
+  data: FindSkillCategoryByIdResponseData | undefined;
+}
+
+/**
+ * FindSkillCategoryByName
+ * Request
+ */
+export interface FindSkillCategoryByNameRequest {
+  skillCategoryName: string;
+}
+
+/** Response */
+export interface FindSkillCategoryByNameResponseData {
+  skillCategory: SkillCategory | undefined;
+}
+
+export interface FindSkillCategoryByNameResponse {
+  status: number;
+  error: string[];
+  data: FindSkillCategoryByNameResponseData | undefined;
+}
+
+/**
+ * FindAllSkillCategories
+ * Request
+ */
+export interface FindAllSkillCategoriesRequest {}
+
+/** Response */
+export interface FindAllSkillCategoriesResponseData {
+  skillCategories: SkillCategory[];
+}
+
+export interface FindAllSkillCategoriesResponse {
+  status: number;
+  error: string[];
+  data: FindAllSkillCategoriesResponseData | undefined;
+}
+
+/**
+ * AddSkill
+ * Request
+ */
+export interface AddSkillRequest {
+  name: string;
+  description: string;
+  category?: string | undefined;
+}
+
+/** Response */
+export interface AddSkillResponseData {
   skillId: string;
 }
 
-export interface SkillResponse {
+export interface AddSkillResponse {
   status: number;
   error: string[];
+  data: AddSkillResponseData | undefined;
+}
+
+/**
+ * FindSkillById
+ * Request
+ */
+export interface FindSkillByIdRequest {
+  skillId: string;
+}
+
+/** Response */
+export interface FindSkillByIdResponseData {
+  skill: Skill | undefined;
+}
+
+export interface FindSkillByIdResponse {
+  status: number;
+  error: string[];
+  data: FindSkillByIdResponseData | undefined;
+}
+
+/**
+ * FindSkillByName
+ * Request
+ */
+export interface FindSkillByNameRequest {
+  skillName: string;
+}
+
+/** Response */
+export interface FindSkillByNameResponseData {
+  skill: Skill | undefined;
+}
+
+export interface FindSkillByNameResponse {
+  status: number;
+  error: string[];
+  data: FindSkillByNameResponseData | undefined;
+}
+
+/**
+ * FindAllSkills
+ * Request
+ */
+export interface FindAllSkillsRequest {}
+
+/** Response */
+export interface FindAllSkillsResponseData {
+  skills: Skill[];
+}
+
+export interface FindAllSkillsResponse {
+  status: number;
+  error: string[];
+  data: FindAllSkillsResponseData | undefined;
+}
+
+/**
+ * FindAllSkillsForCategories
+ * Request
+ */
+export interface FindAllSkillsForCategoriesRequest {
+  categoriesIds: string[];
+}
+
+/** Response */
+export interface FindAllSkillsForCategoriesResponseData {
+  skills: Skill[];
+}
+
+export interface FindAllSkillsForCategoriesResponse {
+  status: number;
+  error: string[];
+  data: FindAllSkillsForCategoriesResponseData | undefined;
 }
 
 export const AUTH_PACKAGE_NAME = 'auth';
 
-/** Service */
+/** Authentication Service */
 
 export interface AuthServiceClient {
-  /** Pure Authentication */
-
   register(request: RegisterRequest): Observable<RegisterResponse>;
 
   login(request: LoginRequest): Observable<LoginResponse>;
 
   validate(request: ValidateRequest): Observable<ValidateResponse>;
+}
 
+/** Authentication Service */
+
+export interface AuthServiceController {
+  register(
+    request: RegisterRequest,
+  ):
+    | Promise<RegisterResponse>
+    | Observable<RegisterResponse>
+    | RegisterResponse;
+
+  login(
+    request: LoginRequest,
+  ): Promise<LoginResponse> | Observable<LoginResponse> | LoginResponse;
+
+  validate(
+    request: ValidateRequest,
+  ):
+    | Promise<ValidateResponse>
+    | Observable<ValidateResponse>
+    | ValidateResponse;
+}
+
+export function AuthServiceControllerMethods() {
+  return function (constructor: Function) {
+    const grpcMethods: string[] = ['register', 'login', 'validate'];
+    for (const method of grpcMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(
+        constructor.prototype,
+        method,
+      );
+      GrpcMethod('AuthService', method)(
+        constructor.prototype[method],
+        method,
+        descriptor,
+      );
+    }
+    const grpcStreamMethods: string[] = [];
+    for (const method of grpcStreamMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(
+        constructor.prototype,
+        method,
+      );
+      GrpcStreamMethod('AuthService', method)(
+        constructor.prototype[method],
+        method,
+        descriptor,
+      );
+    }
+  };
+}
+
+export const AUTH_SERVICE_NAME = 'AuthService';
+
+/** User Management Service */
+
+export interface UserManagementServiceClient {
   /** User Management */
 
   findUserById(request: FindUserByIdRequest): Observable<FindUserByIdResponse>;
@@ -247,35 +482,11 @@ export interface AuthServiceClient {
   removeRoleFromUser(
     request: RemoveRoleFromUserRequest,
   ): Observable<RemoveRoleFromUserResponse>;
-
-  /** Skill Management */
-
-  skill(request: SkillRequest): Observable<SkillResponse>;
 }
 
-/** Service */
+/** User Management Service */
 
-export interface AuthServiceController {
-  /** Pure Authentication */
-
-  register(
-    request: RegisterRequest,
-  ):
-    | Promise<RegisterResponse>
-    | Observable<RegisterResponse>
-    | RegisterResponse;
-
-  login(
-    request: LoginRequest,
-  ): Promise<LoginResponse> | Observable<LoginResponse> | LoginResponse;
-
-  validate(
-    request: ValidateRequest,
-  ):
-    | Promise<ValidateResponse>
-    | Observable<ValidateResponse>
-    | ValidateResponse;
-
+export interface UserManagementServiceController {
   /** User Management */
 
   findUserById(
@@ -323,34 +534,24 @@ export interface AuthServiceController {
     | Promise<RemoveRoleFromUserResponse>
     | Observable<RemoveRoleFromUserResponse>
     | RemoveRoleFromUserResponse;
-
-  /** Skill Management */
-
-  skill(
-    request: SkillRequest,
-  ): Promise<SkillResponse> | Observable<SkillResponse> | SkillResponse;
 }
 
-export function AuthServiceControllerMethods() {
+export function UserManagementServiceControllerMethods() {
   return function (constructor: Function) {
     const grpcMethods: string[] = [
-      'register',
-      'login',
-      'validate',
       'findUserById',
       'removeUserById',
       'activateUserById',
       'deactivateUserById',
       'addRoleToUser',
       'removeRoleFromUser',
-      'skill',
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(
         constructor.prototype,
         method,
       );
-      GrpcMethod('AuthService', method)(
+      GrpcMethod('UserManagementService', method)(
         constructor.prototype[method],
         method,
         descriptor,
@@ -362,7 +563,7 @@ export function AuthServiceControllerMethods() {
         constructor.prototype,
         method,
       );
-      GrpcStreamMethod('AuthService', method)(
+      GrpcStreamMethod('UserManagementService', method)(
         constructor.prototype[method],
         method,
         descriptor,
@@ -371,7 +572,161 @@ export function AuthServiceControllerMethods() {
   };
 }
 
-export const AUTH_SERVICE_NAME = 'AuthService';
+export const USER_MANAGEMENT_SERVICE_NAME = 'UserManagementService';
+
+/** Skill Management Service */
+
+export interface SkillManagementServiceClient {
+  /** Skill Category Management */
+
+  addSkillCategory(
+    request: AddSkillCategoryRequest,
+  ): Observable<AddSkillCategoryResponse>;
+
+  findSkillCategoryById(
+    request: FindSkillCategoryByIdRequest,
+  ): Observable<FindSkillCategoryByIdResponse>;
+
+  findSkillCategoryByName(
+    request: FindSkillCategoryByNameRequest,
+  ): Observable<FindSkillCategoryByNameResponse>;
+
+  findAllSkillCategories(
+    request: FindAllSkillCategoriesRequest,
+  ): Observable<FindAllSkillCategoriesResponse>;
+
+  /** Skill Management */
+
+  addSkill(request: AddSkillRequest): Observable<AddSkillResponse>;
+
+  findSkillById(
+    request: FindSkillByIdRequest,
+  ): Observable<FindSkillByIdResponse>;
+
+  findSkillByName(
+    request: FindSkillByNameRequest,
+  ): Observable<FindSkillByNameResponse>;
+
+  findAllSkills(
+    request: FindAllSkillsRequest,
+  ): Observable<FindAllSkillsResponse>;
+
+  findAllSkillsForCategories(
+    request: FindAllSkillsForCategoriesRequest,
+  ): Observable<FindAllSkillsForCategoriesResponse>;
+}
+
+/** Skill Management Service */
+
+export interface SkillManagementServiceController {
+  /** Skill Category Management */
+
+  addSkillCategory(
+    request: AddSkillCategoryRequest,
+  ):
+    | Promise<AddSkillCategoryResponse>
+    | Observable<AddSkillCategoryResponse>
+    | AddSkillCategoryResponse;
+
+  findSkillCategoryById(
+    request: FindSkillCategoryByIdRequest,
+  ):
+    | Promise<FindSkillCategoryByIdResponse>
+    | Observable<FindSkillCategoryByIdResponse>
+    | FindSkillCategoryByIdResponse;
+
+  findSkillCategoryByName(
+    request: FindSkillCategoryByNameRequest,
+  ):
+    | Promise<FindSkillCategoryByNameResponse>
+    | Observable<FindSkillCategoryByNameResponse>
+    | FindSkillCategoryByNameResponse;
+
+  findAllSkillCategories(
+    request: FindAllSkillCategoriesRequest,
+  ):
+    | Promise<FindAllSkillCategoriesResponse>
+    | Observable<FindAllSkillCategoriesResponse>
+    | FindAllSkillCategoriesResponse;
+
+  /** Skill Management */
+
+  addSkill(
+    request: AddSkillRequest,
+  ):
+    | Promise<AddSkillResponse>
+    | Observable<AddSkillResponse>
+    | AddSkillResponse;
+
+  findSkillById(
+    request: FindSkillByIdRequest,
+  ):
+    | Promise<FindSkillByIdResponse>
+    | Observable<FindSkillByIdResponse>
+    | FindSkillByIdResponse;
+
+  findSkillByName(
+    request: FindSkillByNameRequest,
+  ):
+    | Promise<FindSkillByNameResponse>
+    | Observable<FindSkillByNameResponse>
+    | FindSkillByNameResponse;
+
+  findAllSkills(
+    request: FindAllSkillsRequest,
+  ):
+    | Promise<FindAllSkillsResponse>
+    | Observable<FindAllSkillsResponse>
+    | FindAllSkillsResponse;
+
+  findAllSkillsForCategories(
+    request: FindAllSkillsForCategoriesRequest,
+  ):
+    | Promise<FindAllSkillsForCategoriesResponse>
+    | Observable<FindAllSkillsForCategoriesResponse>
+    | FindAllSkillsForCategoriesResponse;
+}
+
+export function SkillManagementServiceControllerMethods() {
+  return function (constructor: Function) {
+    const grpcMethods: string[] = [
+      'addSkillCategory',
+      'findSkillCategoryById',
+      'findSkillCategoryByName',
+      'findAllSkillCategories',
+      'addSkill',
+      'findSkillById',
+      'findSkillByName',
+      'findAllSkills',
+      'findAllSkillsForCategories',
+    ];
+    for (const method of grpcMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(
+        constructor.prototype,
+        method,
+      );
+      GrpcMethod('SkillManagementService', method)(
+        constructor.prototype[method],
+        method,
+        descriptor,
+      );
+    }
+    const grpcStreamMethods: string[] = [];
+    for (const method of grpcStreamMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(
+        constructor.prototype,
+        method,
+      );
+      GrpcStreamMethod('SkillManagementService', method)(
+        constructor.prototype[method],
+        method,
+        descriptor,
+      );
+    }
+  };
+}
+
+export const SKILL_MANAGEMENT_SERVICE_NAME = 'SkillManagementService';
 
 // If you get a compile-error about 'Constructor<Long> and ... have no overlap',
 // add '--ts_proto_opt=esModuleInterop=true' as a flag when calling 'protoc'.
