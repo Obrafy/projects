@@ -7,14 +7,14 @@ import {
   IsEnum,
   IsOptional,
 } from 'class-validator';
-import * as PROTO from 'src/common/proto/project.pb';
+
 import { TaskDto } from 'src/tasks/dto/task.dto';
 import { Address } from './address.dto';
-import { UpdateProjectDto } from './update-project.dto';
+import * as PROTO from '../../common/dto/proto/project.pb';
 export class ProjectCreateRequestDto implements PROTO.ProjectCreateRequest {
-  @IsEnum(PROTO.StatusType)
+  @IsEnum(PROTO.Status)
   @IsOptional()
-  status: PROTO.StatusType;
+  status: PROTO.Status;
 
   @IsNotEmpty()
   startDate: string;
@@ -48,9 +48,9 @@ export class ProjectUpdateRequestDto implements PROTO.ProjectUpdateRequest {
   @IsString()
   public readonly id: string;
 
-  @Type(() => UpdateProjectDto)
+  // @Type(() => PROTO.UpdateProjectData)
   @ValidateNested()
-  data: UpdateProjectDto;
+  data: PROTO.UpdateProjectData;
 }
 
 export class ProjectRemoveRequestDto implements PROTO.ProjectRemoveRequest {
@@ -63,6 +63,39 @@ export class FindAllTaskOfProjectRequestDto
 {
   @IsString()
   public readonly id: string;
+}
+
+
+enum LevelType {
+  'LOW' = 'LOW',
+  'HIGH' = 'HIGH',
+}
+
+enum UnityType {
+  'VB' = 'VB',
+  'M2' = 'M²',
+  'UNID' = 'UNID',
+}
+
+
+export class FieldsOverridesDataDto implements PROTO.FieldsOverrides {
+  @IsString()
+  category: string;
+
+  @IsString()
+  activity: string;
+
+  @IsString()
+  description: string;
+
+  @IsEnum(LevelType)
+  noiseLevel: LevelType;
+
+  @IsEnum(LevelType)
+  dirtLevel: LevelType;
+
+  @IsEnum(UnityType)
+  unity: UnityType;
 }
 
 export class FieldsOverridesRequestDto implements PROTO.FieldsOverridesRequest {
@@ -78,22 +111,3 @@ export class FieldsOverridesRequestDto implements PROTO.FieldsOverridesRequest {
   public readonly data: FieldsOverridesDataDto;
 }
 
-export class FieldsOverridesDataDto implements PROTO.FieldsOverrides {
-  @IsString()
-  category: string;
-
-  @IsString()
-  activity: string;
-
-  @IsString()
-  description: string;
-
-  @IsEnum(PROTO.LevelType)
-  noiseLevel: PROTO.LevelType;
-
-  @IsEnum(PROTO.LevelType)
-  dirtLevel: PROTO.LevelType;
-
-  @IsEnum(PROTO.UnityType)
-  unity: PROTO.UnityType;
-}
