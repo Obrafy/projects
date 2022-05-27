@@ -122,3 +122,8 @@ export class FieldsOverridesRequestDto implements PROTO.FieldsOverridesRequest {
   @IsNotEmpty()
   public readonly data: FieldsOverridesDataDto;
 }
+
+export class ActivateProjectRequestDto implements PROTO.ActivateProjectRequest {
+  @IsMongoId()
+  projectId: string;
+}

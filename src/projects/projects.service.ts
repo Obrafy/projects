@@ -165,4 +165,21 @@ export class ProjectsService {
 
     // return project
   }
+
+  public async activateProject(
+    payload: DTO.ActivateProjectRequestDto,
+  ): Promise<void> {
+    this.logger.log(this.activateProject.name, payload);
+    const project = await this._getProjectById(payload.projectId);
+
+    if (!project) {
+      throw new EXCEPTIONS.NotFoundException(
+        PROJECT_ERROR_MESSAGES_KEYS.PROJECT_NOT_FOUND,
+      );
+    }
+
+    project.status = Status.ACTIVE;
+
+    await project.save();
+  }
 }

@@ -4,6 +4,7 @@ import makeResponse from '../common/helpers/make-response';
 import * as PROTO from '../common/dto/proto/project.pb';
 import { ProjectsService } from './projects.service';
 import {
+  ActivateProjectRequestDto,
   FieldsOverridesDataDto,
   FieldsOverridesRequestDto,
   FindAllTaskOfProjectRequestDto,
@@ -81,6 +82,14 @@ export class ProjectsController {
         id: projectData._id,
       },
     });
+  }
+
+  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'activateProject')
+  private async activateProject(
+    payload: ActivateProjectRequestDto,
+  ): Promise<PROTO.ActivateProjectResponse> {
+    await this.projectsService.activateProject(payload);
+    return makeResponse<PROTO.ActivateProjectResponse>(null);
   }
 
   @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'update')
