@@ -11,6 +11,7 @@ import {
 import { TaskDto } from 'src/tasks/dto/task.dto';
 import { Address } from './address.dto';
 import * as PROTO from '../../common/dto/proto/project.pb';
+import { UpdateProjectData } from '../../common/dto/proto/project.pb';
 export class ProjectCreateRequestDto implements PROTO.ProjectCreateRequest {
   @IsEnum(PROTO.Status)
   @IsOptional()
@@ -37,20 +38,30 @@ export class ProjectCreateRequestDto implements PROTO.ProjectCreateRequest {
   tasks: TaskDto[];
 }
 
-export class ProjectFindAllRequestDto implements PROTO.ProjectFindAllRequest {}
+export class ProjectFindAllRequestDto implements PROTO.ProjectFindAllRequest { }
 
 export class ProjectFindOneRequestDto implements PROTO.ProjectFindOneRequest {
   @IsString()
   public readonly id: string;
 }
 
+export class UpdateProjectDataDto implements PROTO.UpdateProjectData {
+
+  expectedFinishedDate?: string;
+  startDate?: string;
+  status?: PROTO.Status;
+
+  @IsString()
+  responsible?: string;
+}
+
 export class ProjectUpdateRequestDto implements PROTO.ProjectUpdateRequest {
   @IsString()
   public readonly id: string;
 
-  // @Type(() => PROTO.UpdateProjectData)
+  @Type(() => UpdateProjectDataDto)
   @ValidateNested()
-  data: PROTO.UpdateProjectData;
+  data: UpdateProjectDataDto;
 }
 
 export class ProjectRemoveRequestDto implements PROTO.ProjectRemoveRequest {
@@ -59,8 +70,7 @@ export class ProjectRemoveRequestDto implements PROTO.ProjectRemoveRequest {
 }
 
 export class FindAllTaskOfProjectRequestDto
-  implements PROTO.FindAllTaskOfProjectRequest
-{
+  implements PROTO.FindAllTaskOfProjectRequest {
   @IsString()
   public readonly id: string;
 }
@@ -80,21 +90,27 @@ enum UnityType {
 
 export class FieldsOverridesDataDto implements PROTO.FieldsOverrides {
   @IsString()
+  @IsOptional()
   category: string;
 
   @IsString()
+  @IsOptional()
   activity: string;
 
   @IsString()
+  @IsOptional()
   description: string;
 
   @IsEnum(LevelType)
+  @IsOptional()
   noiseLevel: LevelType;
 
   @IsEnum(LevelType)
+  @IsOptional()
   dirtLevel: LevelType;
 
   @IsEnum(UnityType)
+  @IsOptional()
   unity: UnityType;
 }
 

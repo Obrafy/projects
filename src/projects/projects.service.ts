@@ -142,14 +142,16 @@ export class ProjectsService {
     taskId,
     data,
   }: DTO.FieldsOverridesRequestDto): Promise<ProjectDocument> {
-    const project = await this.projectModel.findOneAndUpdate(
-      {
-        _id: projectId,
-        'tasks.task': taskId,
-      },
-      data,
-    );
 
-    return project
+    this.logger.log('Make fields Overrides', data);
+
+
+    const project = await this._getProjectById(projectId)
+
+    const projectTask = project.tasks.find((task) => task === taskId)
+    projectTask.fieldsOverrides = data
+    return project.save()
+
+    // return project
   }
 }
