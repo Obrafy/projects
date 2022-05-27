@@ -8,6 +8,7 @@ import {
   IsNotEmpty,
   ValidateNested,
 } from 'class-validator';
+import { TransformEnum } from 'src/common/decorators/transform-enum.decorator';
 import {
   TaskCreateRequest,
   TaskFindAllRequest,
@@ -16,6 +17,8 @@ import {
   TaskUpdateRequest,
   TaskUpdateData,
   PossibleSkills,
+  LevelType as ProtoLevelType,
+  UnityType as ProtoUnitType,
 } from 'src/common/dto/proto/project.pb';
 
 enum LevelType {
@@ -37,18 +40,21 @@ export class TaskCreateRequestDto implements TaskCreateRequest {
   activity: string;
 
   @IsEnum(LevelType)
+  @TransformEnum(LevelType, ProtoLevelType)
   noiseLevel: LevelType;
 
   @IsEnum(LevelType)
+  @TransformEnum(LevelType, ProtoLevelType)
   dirtLevel: LevelType;
 
   @IsString()
   description: string;
 
   @IsEnum(UnityType)
+  @TransformEnum(UnityType, ProtoUnitType)
   unity: UnityType;
 
-  @IsArray()
+  @IsString({ each: true })
   laborers: string[];
 
   @Type(() => PossibleSkillsDto)
