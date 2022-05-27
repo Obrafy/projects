@@ -166,10 +166,11 @@ export class ProjectsService {
     // return project
   }
 
-  public async activateProject(
-    payload: DTO.ActivateProjectRequestDto,
+  public async changeProjectStatus(
+    payload: DTO.ProjectStatusRequestDto,
+    status: Status,
   ): Promise<void> {
-    this.logger.log(this.activateProject.name, payload);
+    this.logger.log(this.changeProjectStatus.name, payload);
     const project = await this._getProjectById(payload.projectId);
 
     if (!project) {
@@ -178,7 +179,7 @@ export class ProjectsService {
       );
     }
 
-    project.status = Status.ACTIVE;
+    project.status = status;
 
     await project.save();
   }

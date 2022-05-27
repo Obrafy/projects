@@ -3,16 +3,8 @@ import { GrpcMethod } from '@nestjs/microservices';
 import makeResponse from '../common/helpers/make-response';
 import * as PROTO from '../common/dto/proto/project.pb';
 import { ProjectsService } from './projects.service';
-import {
-  ActivateProjectRequestDto,
-  FieldsOverridesDataDto,
-  FieldsOverridesRequestDto,
-  FindAllTaskOfProjectRequestDto,
-  ProjectCreateRequestDto,
-  ProjectFindOneRequestDto,
-  ProjectRemoveRequestDto,
-  ProjectUpdateRequestDto,
-} from './dto/project.dto';
+import * as DTO from './dto/project.dto';
+import { Status } from 'src/common/dto/status.enum';
 
 @Controller()
 export class ProjectsController {
@@ -20,18 +12,14 @@ export class ProjectsController {
   private readonly projectsService: ProjectsService;
 
   @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'create')
-  private async create(
-    createProjectDto: ProjectCreateRequestDto,
-  ): Promise<PROTO.ProjectCreateResponse> {
+  private async create(createProjectDto: DTO.ProjectCreateRequestDto): Promise<PROTO.ProjectCreateResponse> {
     const projectData = await this.projectsService.create(createProjectDto);
 
     return makeResponse<PROTO.ProjectCreateResponse>({
       project: {
         status: projectData.status,
         startDate: new Date(projectData.startDate).getTime(),
-        expectedFinishedDate: new Date(
-          projectData.expectedFinishedDate,
-        ).getTime(),
+        expectedFinishedDate: new Date(projectData.expectedFinishedDate).getTime(),
         responsible: projectData.responsible,
         address: projectData.address,
         projectTask: [],
@@ -49,9 +37,7 @@ export class ProjectsController {
         project: {
           status: projectData.status,
           startDate: new Date(projectData.startDate).getTime(),
-          expectedFinishedDate: new Date(
-            projectData.expectedFinishedDate,
-          ).getTime(),
+          expectedFinishedDate: new Date(projectData.expectedFinishedDate).getTime(),
           responsible: projectData.responsible,
           address: projectData.address,
           projectTask: [],
@@ -64,9 +50,7 @@ export class ProjectsController {
   }
 
   @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'findOne')
-  private async findOne(
-    payload: ProjectFindOneRequestDto,
-  ): Promise<PROTO.ProjectFindOneResponse> {
+  private async findOne(payload: DTO.ProjectFindOneRequestDto): Promise<PROTO.ProjectFindOneResponse> {
     const projectData = await this.projectsService.findOne(payload);
 
     return makeResponse<PROTO.ProjectFindOneResponse>({
@@ -74,9 +58,7 @@ export class ProjectsController {
         projectTask: [],
         status: projectData.status,
         startDate: new Date(projectData.startDate).getTime(),
-        expectedFinishedDate: new Date(
-          projectData.expectedFinishedDate,
-        ).getTime(),
+        expectedFinishedDate: new Date(projectData.expectedFinishedDate).getTime(),
         responsible: projectData.responsible,
         address: projectData.address,
         id: projectData._id,
@@ -85,18 +67,19 @@ export class ProjectsController {
   }
 
   @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'activateProject')
-  private async activateProject(
-    payload: ActivateProjectRequestDto,
-  ): Promise<PROTO.ActivateProjectResponse> {
-    await this.projectsService.activateProject(payload);
+  private async activateProject(payload: DTO.ProjectStatusRequestDto): Promise<PROTO.ActivateProjectResponse> {
+    await this.projectsService.changeProjectStatus(payload, Status.ACTIVE);
     return makeResponse<PROTO.ActivateProjectResponse>(null);
   }
 
+  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'deactivateProject')
+  private async deactivateProject(payload: DTO.ProjectStatusRequestDto): Promise<PROTO.DeactivateProjectResponse> {
+    await this.projectsService.changeProjectStatus(payload, Status.INACTIVE);
+    return makeResponse<PROTO.DeactivateProjectResponse>(null);
+  }
+
   @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'update')
-  private async update({
-    id,
-    data,
-  }: ProjectUpdateRequestDto): Promise<PROTO.ProjectUpdateResponse> {
+  private async update({ id, data }: DTO.ProjectUpdateRequestDto): Promise<PROTO.ProjectUpdateResponse> {
     const projectData = await this.projectsService.update({
       id,
       data: data as PROTO.UpdateProjectData,
@@ -106,9 +89,7 @@ export class ProjectsController {
       project: {
         status: projectData.status,
         startDate: new Date(projectData.startDate).getTime(),
-        expectedFinishedDate: new Date(
-          projectData.expectedFinishedDate,
-        ).getTime(),
+        expectedFinishedDate: new Date(projectData.expectedFinishedDate).getTime(),
         responsible: projectData.responsible,
         address: projectData.address,
         id: projectData._id,
@@ -118,9 +99,7 @@ export class ProjectsController {
   }
 
   @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'remove')
-  private async remove(
-    payload: ProjectRemoveRequestDto,
-  ): Promise<PROTO.ProjectRemoveResponse> {
+  private async remove(payload: DTO.ProjectRemoveRequestDto): Promise<PROTO.ProjectRemoveResponse> {
     await this.projectsService.remove(payload);
 
     return makeResponse<PROTO.ProjectRemoveResponse>(null);
@@ -128,11 +107,9 @@ export class ProjectsController {
 
   @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'findAllTaskOfProject')
   private async findAllTaskOfProject(
-    payload: FindAllTaskOfProjectRequestDto,
+    payload: DTO.FindAllTaskOfProjectRequestDto,
   ): Promise<PROTO.FindAllTaskOfProjectResponse> {
-    const taskProjectData = await this.projectsService.findAllTaskOfProject(
-      payload,
-    );
+    const taskProjectData = await this.projectsService.findAllTaskOfProject(payload);
 
     const result = taskProjectData.tasks.map((item) => {
       const { task } = item;
@@ -156,11 +133,11 @@ export class ProjectsController {
     projectId,
     taskId,
     data,
-  }: FieldsOverridesRequestDto): Promise<PROTO.FieldsOverridesResponse> {
+  }: DTO.FieldsOverridesRequestDto): Promise<PROTO.FieldsOverridesResponse> {
     const taskProjectData = await this.projectsService.fieldsOverrides({
       projectId,
       taskId,
-      data: data as FieldsOverridesDataDto,
+      data: data as DTO.FieldsOverridesDataDto,
     });
 
     const task = taskProjectData.tasks[0].task;

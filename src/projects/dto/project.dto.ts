@@ -123,7 +123,9 @@ export class FieldsOverridesRequestDto implements PROTO.FieldsOverridesRequest {
   public readonly data: FieldsOverridesDataDto;
 }
 
-export class ActivateProjectRequestDto implements PROTO.ActivateProjectRequest {
+export class ProjectStatusRequestDto
+  implements PROTO.ActivateProjectRequest, PROTO.DeactivateProjectRequest
+{
   @IsMongoId()
   projectId: string;
 }

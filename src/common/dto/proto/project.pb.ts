@@ -222,6 +222,23 @@ export interface ActivateProjectResponse {
 }
 
 /**
+ * DeactivateProject
+ * Request
+ */
+export interface DeactivateProjectRequest {
+  projectId: string;
+}
+
+/** Response */
+export interface DeactivateProjectResponseData {}
+
+export interface DeactivateProjectResponse {
+  status: number;
+  error: string[];
+  data: DeactivateProjectResponse | undefined;
+}
+
+/**
  * TaskCreate
  * Request
  */
@@ -349,6 +366,10 @@ export interface ProjectServiceClient {
   activateProject(
     request: ActivateProjectRequest,
   ): Observable<ActivateProjectResponse>;
+
+  deactivateProject(
+    request: DeactivateProjectRequest,
+  ): Observable<DeactivateProjectResponse>;
 }
 
 export interface ProjectServiceController {
@@ -407,6 +428,13 @@ export interface ProjectServiceController {
     | Promise<ActivateProjectResponse>
     | Observable<ActivateProjectResponse>
     | ActivateProjectResponse;
+
+  deactivateProject(
+    request: DeactivateProjectRequest,
+  ):
+    | Promise<DeactivateProjectResponse>
+    | Observable<DeactivateProjectResponse>
+    | DeactivateProjectResponse;
 }
 
 export function ProjectServiceControllerMethods() {
@@ -420,6 +448,7 @@ export function ProjectServiceControllerMethods() {
       'findAllTaskOfProject',
       'fieldsOverrides',
       'activateProject',
+      'deactivateProject',
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(
