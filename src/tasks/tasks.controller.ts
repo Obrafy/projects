@@ -1,4 +1,4 @@
-import { Controller, HttpStatus, Inject } from '@nestjs/common';
+import { Controller, Inject } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { TasksService } from './tasks.service';
 import * as PROTO from '../common/dto/proto/project.pb';
@@ -29,17 +29,16 @@ export class TasksController {
         description: taskData.description,
         unity: taskData.unity,
         possibleSkills: taskData.possibleSkills,
-        status: taskData.status
-      }
-    })
-
+        status: taskData.status,
+      },
+    });
   }
 
   @GrpcMethod(PROTO.TASK_SERVICE_NAME, 'findAll')
   private async findAll(): Promise<PROTO.TaskFindAllResponse> {
     const tasksData = await this.tasksService.findAll();
 
-    const result = tasksData.map(task => {
+    const result = tasksData.map((task) => {
       return {
         task: {
           category: task.category,
@@ -49,13 +48,12 @@ export class TasksController {
           description: task.description,
           unity: task.unity,
           possibleSkills: task.possibleSkills,
-          status: task.status
-        }
-      }
-    })
+          status: task.status,
+        },
+      };
+    });
 
-    return makeResponse<PROTO.TaskFindAllResponse>(result)
-
+    return makeResponse<PROTO.TaskFindAllResponse>(result);
   }
 
   @GrpcMethod(PROTO.TASK_SERVICE_NAME, 'findOne')
@@ -74,8 +72,8 @@ export class TasksController {
         unity: taskData.unity,
         possibleSkills: taskData.possibleSkills,
         status: taskData.status,
-      }
-    })
+      },
+    });
   }
 
   @GrpcMethod(PROTO.TASK_SERVICE_NAME, 'update')
@@ -97,9 +95,9 @@ export class TasksController {
         description: taskData.description,
         unity: taskData.unity,
         possibleSkills: taskData.possibleSkills,
-        status: taskData.status
-      }
-    })
+        status: taskData.status,
+      },
+    });
   }
 
   @GrpcMethod(PROTO.TASK_SERVICE_NAME, 'remove')
@@ -108,6 +106,6 @@ export class TasksController {
   ): Promise<PROTO.TaskRemoveResponse> {
     await this.tasksService.remove(payload);
 
-    return makeResponse<PROTO.TaskRemoveResponse>(null)
+    return makeResponse<PROTO.TaskRemoveResponse>(null);
   }
 }

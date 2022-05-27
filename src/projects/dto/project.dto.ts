@@ -11,7 +11,7 @@ import {
 import { TaskDto } from 'src/tasks/dto/task.dto';
 import { Address } from './address.dto';
 import * as PROTO from '../../common/dto/proto/project.pb';
-import { UpdateProjectData } from '../../common/dto/proto/project.pb';
+
 export class ProjectCreateRequestDto implements PROTO.ProjectCreateRequest {
   @IsEnum(PROTO.Status)
   @IsOptional()
@@ -38,7 +38,7 @@ export class ProjectCreateRequestDto implements PROTO.ProjectCreateRequest {
   tasks: TaskDto[];
 }
 
-export class ProjectFindAllRequestDto implements PROTO.ProjectFindAllRequest { }
+export class ProjectFindAllRequestDto implements PROTO.ProjectFindAllRequest {}
 
 export class ProjectFindOneRequestDto implements PROTO.ProjectFindOneRequest {
   @IsString()
@@ -46,7 +46,6 @@ export class ProjectFindOneRequestDto implements PROTO.ProjectFindOneRequest {
 }
 
 export class UpdateProjectDataDto implements PROTO.UpdateProjectData {
-
   expectedFinishedDate?: string;
   startDate?: string;
   status?: PROTO.Status;
@@ -70,11 +69,11 @@ export class ProjectRemoveRequestDto implements PROTO.ProjectRemoveRequest {
 }
 
 export class FindAllTaskOfProjectRequestDto
-  implements PROTO.FindAllTaskOfProjectRequest {
+  implements PROTO.FindAllTaskOfProjectRequest
+{
   @IsString()
   public readonly id: string;
 }
-
 
 enum LevelType {
   'LOW' = 'LOW',
@@ -86,7 +85,6 @@ enum UnityType {
   'M2' = 'M²',
   'UNID' = 'UNID',
 }
-
 
 export class FieldsOverridesDataDto implements PROTO.FieldsOverrides {
   @IsString()
@@ -126,4 +124,3 @@ export class FieldsOverridesRequestDto implements PROTO.FieldsOverridesRequest {
   @IsNotEmpty()
   public readonly data: FieldsOverridesDataDto;
 }
-

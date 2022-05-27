@@ -1,4 +1,4 @@
-import { Controller, HttpStatus, Inject } from '@nestjs/common';
+import { Controller, Inject } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import makeResponse from '../common/helpers/make-response';
 import * as PROTO from '../common/dto/proto/project.pb';
@@ -28,12 +28,14 @@ export class ProjectsController {
       project: {
         status: projectData.status,
         startDate: new Date(projectData.startDate).getTime(),
-        expectedFinishedDate: new Date(projectData.expectedFinishedDate).getTime(),
+        expectedFinishedDate: new Date(
+          projectData.expectedFinishedDate,
+        ).getTime(),
         responsible: projectData.responsible,
         address: projectData.address,
         projectTask: [],
         id: projectData._id,
-      }
+      },
     });
   }
 
@@ -41,19 +43,21 @@ export class ProjectsController {
   private async findAll(): Promise<PROTO.ProjectFindAllResponse> {
     const projects = await this.projectsService.findAll();
 
-    const result = projects.map(projectData => {
+    const result = projects.map((projectData) => {
       return {
         project: {
           status: projectData.status,
           startDate: new Date(projectData.startDate).getTime(),
-          expectedFinishedDate: new Date(projectData.expectedFinishedDate).getTime(),
+          expectedFinishedDate: new Date(
+            projectData.expectedFinishedDate,
+          ).getTime(),
           responsible: projectData.responsible,
           address: projectData.address,
           projectTask: [],
           id: projectData._id,
-        }
-      }
-    })
+        },
+      };
+    });
 
     return makeResponse<PROTO.ProjectFindAllResponse>(result);
   }
@@ -69,11 +73,13 @@ export class ProjectsController {
         projectTask: [],
         status: projectData.status,
         startDate: new Date(projectData.startDate).getTime(),
-        expectedFinishedDate: new Date(projectData.expectedFinishedDate).getTime(),
+        expectedFinishedDate: new Date(
+          projectData.expectedFinishedDate,
+        ).getTime(),
         responsible: projectData.responsible,
         address: projectData.address,
         id: projectData._id,
-      }
+      },
     });
   }
 
@@ -91,12 +97,14 @@ export class ProjectsController {
       project: {
         status: projectData.status,
         startDate: new Date(projectData.startDate).getTime(),
-        expectedFinishedDate: new Date(projectData.expectedFinishedDate).getTime(),
+        expectedFinishedDate: new Date(
+          projectData.expectedFinishedDate,
+        ).getTime(),
         responsible: projectData.responsible,
         address: projectData.address,
         id: projectData._id,
-        projectTask: []
-      }
+        projectTask: [],
+      },
     });
   }
 
@@ -113,10 +121,12 @@ export class ProjectsController {
   private async findAllTaskOfProject(
     payload: FindAllTaskOfProjectRequestDto,
   ): Promise<PROTO.FindAllTaskOfProjectResponse> {
-    const taskProjectData = await this.projectsService.findAllTaskOfProject(payload);
+    const taskProjectData = await this.projectsService.findAllTaskOfProject(
+      payload,
+    );
 
-    const result = taskProjectData.tasks.map(item => {
-      const { task } = item
+    const result = taskProjectData.tasks.map((item) => {
+      const { task } = item;
 
       return {
         category: task.category,
@@ -125,11 +135,9 @@ export class ProjectsController {
         dirtLevel: task.dirtLevel,
         description: task.description,
         unity: task.unity,
-        possibleSkills: task.possibleSkills
+        possibleSkills: task.possibleSkills,
       };
-    })
-
-
+    });
 
     return makeResponse<PROTO.FindAllTaskOfProjectResponse>(result);
   }
@@ -146,7 +154,7 @@ export class ProjectsController {
       data: data as FieldsOverridesDataDto,
     });
 
-    const task = taskProjectData.tasks[0].task
+    const task = taskProjectData.tasks[0].task;
 
     const result = {
       category: task.category,
@@ -155,10 +163,9 @@ export class ProjectsController {
       dirtLevel: task.dirtLevel,
       description: task.description,
       unity: task.unity,
-      possibleSkills: task.possibleSkills
+      possibleSkills: task.possibleSkills,
     };
 
     return makeResponse<PROTO.FieldsOverridesResponse>(result);
-
   }
 }

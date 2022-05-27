@@ -7,7 +7,10 @@ import { Project, ProjectSchema } from './entities/project.entity';
 import { Address, AddressSchema } from './entities/address.entity';
 import { TasksModule } from 'src/tasks/tasks.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { AUTH_PACKAGE_NAME, USER_MANAGEMENT_SERVICE_NAME } from 'src/common/dto/proto/auth.pb';
+import {
+  AUTH_PACKAGE_NAME,
+  USER_MANAGEMENT_SERVICE_NAME,
+} from 'src/common/dto/proto/auth.pb';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ConfigInterface } from 'src/config';
 import { makeMicroserviceUrl } from 'src/common/helpers/make-microservice';

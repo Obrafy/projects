@@ -15,7 +15,7 @@ import {
   TaskRemoveRequest,
   TaskUpdateRequest,
   TaskUpdateData,
-  PossibleSkills
+  PossibleSkills,
 } from 'src/common/dto/proto/project.pb';
 
 enum LevelType {

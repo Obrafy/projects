@@ -1,7 +1,14 @@
 import { mongo } from 'mongoose';
 import { ConfigInterface } from 'src/config';
 import { ConfigService } from '@nestjs/config';
-import { ExceptionFilter, Catch, HttpException, HttpStatus, Injectable, Inject } from '@nestjs/common';
+import {
+  ExceptionFilter,
+  Catch,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Inject,
+} from '@nestjs/common';
 
 import { getLanguageSpecificErrorMessage } from '../error-messages/error-messages.helpers';
 import { DATABASE_ERROR_MESSAGES_KEYS } from '../error-messages/error-messagens.interface';
@@ -11,7 +18,10 @@ const DUPLICATE_KEY_MONGO_ERROR_CODE = 11000;
 @Injectable()
 @Catch()
 export class CatchAllExceptionFilter implements ExceptionFilter {
-  constructor(@Inject(ConfigService) private readonly configService: ConfigService<ConfigInterface>) {}
+  constructor(
+    @Inject(ConfigService)
+    private readonly configService: ConfigService<ConfigInterface>,
+  ) {}
 
   catch(exception: unknown) {
     if (exception instanceof HttpException) {
@@ -25,13 +35,18 @@ export class CatchAllExceptionFilter implements ExceptionFilter {
       if (Array.isArray(response.message)) {
         response.message.forEach((r: string) =>
           errorMessages.push(
-            getLanguageSpecificErrorMessage(this.configService.get('SERVER_LANG', { infer: true }), r) ?? r,
+            getLanguageSpecificErrorMessage(
+              this.configService.get('SERVER_LANG', { infer: true }),
+              r,
+            ) ?? r,
           ),
         );
       } else {
         errorMessages.push(
-          getLanguageSpecificErrorMessage(this.configService.get('SERVER_LANG', { infer: true }), response.message) ??
+          getLanguageSpecificErrorMessage(
+            this.configService.get('SERVER_LANG', { infer: true }),
             response.message,
+          ) ?? response.message,
         );
       }
 
@@ -50,7 +65,10 @@ export class CatchAllExceptionFilter implements ExceptionFilter {
         if ((exception as any).keyValue) {
           replaceArray = [
             { key: 'key', value: Object.keys((exception as any).keyValue)[0] },
-            { key: 'value', value: Object.values((exception as any).keyValue)[0] as string },
+            {
+              key: 'value',
+              value: Object.values((exception as any).keyValue)[0] as string,
+            },
           ];
         }
 

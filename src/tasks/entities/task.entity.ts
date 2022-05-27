@@ -24,7 +24,6 @@ class PossibleSkills {
 }
 @Schema()
 export class Task {
-
   @Prop({ required: false, default: Status.ACTIVE })
   status: Status;
 
@@ -37,13 +36,13 @@ export class Task {
   @Prop()
   description: string;
 
-  @Prop({ required: false,  default: LevelType.LOW })
+  @Prop({ required: false, default: LevelType.LOW })
   noiseLevel: LevelType;
 
-  @Prop({ required: false,  default: LevelType.LOW })
+  @Prop({ required: false, default: LevelType.LOW })
   dirtLevel: LevelType;
 
-  @Prop({ required: false,  default: UnityType.VB })
+  @Prop({ required: false, default: UnityType.VB })
   unity: UnityType;
 
   @Prop({ required: true })

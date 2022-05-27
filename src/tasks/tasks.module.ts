@@ -8,7 +8,10 @@ import { TasksService } from './tasks.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ConfigInterface } from 'src/config';
 import { makeMicroserviceUrl } from 'src/common/helpers/make-microservice';
-import { AUTH_PACKAGE_NAME, SKILL_MANAGEMENT_SERVICE_NAME } from 'src/common/dto/proto/auth.pb';
+import {
+  AUTH_PACKAGE_NAME,
+  SKILL_MANAGEMENT_SERVICE_NAME,
+} from 'src/common/dto/proto/auth.pb';
 
 @Module({
   controllers: [TasksController],
