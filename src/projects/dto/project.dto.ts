@@ -6,23 +6,22 @@ import {
   ValidateNested,
   IsEnum,
   IsOptional,
+  IsMongoId,
 } from 'class-validator';
 
-import { TaskDto } from 'src/tasks/dto/task.dto';
 import { Address } from './address.dto';
 import * as PROTO from '../../common/dto/proto/project.pb';
+import { PartialBy } from 'src/common/types/global';
 
-export class ProjectCreateRequestDto implements PROTO.ProjectCreateRequest {
-  @IsEnum(PROTO.Status)
-  @IsOptional()
-  status: PROTO.Status;
-
+export class ProjectCreateRequestDto
+  implements PartialBy<PROTO.ProjectCreateRequest, 'tasks'>
+{
   @IsNotEmpty()
   startDate: string;
 
   @IsDateString()
   @IsNotEmpty()
-  expectedFinishedDate;
+  expectedFinishedDate: string;
 
   @IsString()
   responsible: string;
@@ -32,10 +31,9 @@ export class ProjectCreateRequestDto implements PROTO.ProjectCreateRequest {
   @IsNotEmpty()
   address: Address;
 
-  @Type(() => TaskDto)
-  @ValidateNested()
-  @IsNotEmpty()
-  tasks: TaskDto[];
+  @IsMongoId({ each: true })
+  @IsOptional()
+  tasks?: string[];
 }
 
 export class ProjectFindAllRequestDto implements PROTO.ProjectFindAllRequest {}

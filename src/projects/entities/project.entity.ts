@@ -26,7 +26,7 @@ export class Project {
   @Prop({ type: mongoose.Types.ObjectId, ref: 'Address' })
   address: Address;
 
-  @Prop([ProjectTasks])
+  @Prop({ instance: [ProjectTasks], required: false })
   tasks: ProjectTasks[];
 }
 

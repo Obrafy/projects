@@ -8,11 +8,12 @@ export const protobufPackage = 'project';
 
 /** All Enums */
 export enum Status {
-  ACTIVE = 0,
-  INACTIVE = 1,
-  IN_PROGRESS = 2,
-  FINISHED = 3,
-  DELETED = 4,
+  INVALID = 0,
+  ACTIVE = 1,
+  INACTIVE = 2,
+  IN_PROGRESS = 3,
+  FINISHED = 4,
+  DELETED = 5,
   UNRECOGNIZED = -1,
 }
 
@@ -42,8 +43,7 @@ export interface ProjectCreateRequest {
   expectedFinishedDate: string;
   responsible: string;
   address: Address | undefined;
-  tasks: Task[];
-  status: Status;
+  tasks: string[];
 }
 
 /** Response */

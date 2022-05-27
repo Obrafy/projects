@@ -58,33 +58,28 @@ export class ProjectsService {
   ): Promise<ProjectDocument> {
     this.logger.log('Creating new project');
 
-    const { address, tasks } = createProjectDto;
+    try {
+      const { address, tasks } = createProjectDto;
 
-    const allTasks = tasks.map(async (task) => {
-      const { laborers } = task;
-
-      laborers.map(async (userId) => {
-        const { error } = await firstValueFrom(
-          this.userManagementServiceClient.findUserById({ userId }),
+      if (tasks) {
+        await Promise.all(
+          tasks.map((taskId) => this.tasksService.findOne({ id: taskId })),
         );
-        if (error && error.length > 0) throw new NotFoundException(error);
+      }
+
+      let addressObj = await this.addressModel.findOne({ ...address });
+
+      if (!addressObj) {
+        addressObj = await this.addressModel.create(address);
+      }
+
+      return await this.projectModel.create({
+        ...createProjectDto,
+        address: addressObj,
       });
-
-      const taskCreated = await this.tasksService.create(task);
-
-      return {
-        task: taskCreated.id,
-        laborers: task.laborers,
-      };
-    });
-
-    const tasksCreated = await Promise.all(allTasks);
-    await this.addressModel.create(address);
-
-    return await this.projectModel.create({
-      ...createProjectDto,
-      tasks: tasksCreated,
-    });
+    } catch (err) {
+      console.error({ err });
+    }
   }
 
   public async findAll(): Promise<ProjectDocument[]> {
@@ -164,7 +159,7 @@ export class ProjectsService {
 
     const project = await this._getProjectById(projectId);
 
-    const projectTask = project.tasks.find((task) => task === taskId);
+    const projectTask = project.tasks.find(({ task }) => task._id === taskId);
     projectTask.fieldsOverrides = data;
     return project.save();
 
