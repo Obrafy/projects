@@ -42,8 +42,8 @@ export class TasksService {
 
     const checkSkillPromises = createTaskDto.possibleSkills.map(async (skill) => {
       const skillId: string = skill.skillId;
-      const { status } = await firstValueFrom(this.skillManagementServiceClient.findSkillById({ skillId }))
-      if (status === 404) throw new NotFoundException();
+      const { error } = await firstValueFrom(this.skillManagementServiceClient.findSkillById({ skillId }))
+      if (error && error.length > 0) throw new EXCEPTIONS.NotFoundException(error);
     });
 
     await Promise.all(checkSkillPromises);

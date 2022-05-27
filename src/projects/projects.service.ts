@@ -62,7 +62,7 @@ export class ProjectsService {
       laborers.map(async (userId) => {
         const { error } = await firstValueFrom(
           this.userManagementServiceClient.findUserById({ userId }));
-        if (error.length > 0) throw new NotFoundException();
+        if (error && error.length > 0) throw new NotFoundException(error);
       });
 
       const taskCreated = await this.tasksService.create(task);
@@ -116,8 +116,6 @@ export class ProjectsService {
     project.status = Status.DELETED;
 
     await project.save()
-
-    await this.projectModel.findOneAndDelete({ _id: id });
   }
 
   public async findAllTaskOfProject({
