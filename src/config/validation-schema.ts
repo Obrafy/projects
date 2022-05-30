@@ -2,9 +2,7 @@ import * as Joi from 'joi';
 import { ConfigInterface } from '.';
 
 export default Joi.object<ConfigInterface>({
-  NODE_ENV: Joi.string()
-    .valid('development', 'production')
-    .default('development'),
+  NODE_ENV: Joi.string().valid('development', 'production').default('development'),
   PORT: Joi.number().default(3000),
 
   SERVER_LANG: Joi.string().valid('pt-br', 'en-us').default('en-us'),
