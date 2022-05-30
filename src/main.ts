@@ -3,25 +3,22 @@ import { Transport } from '@nestjs/microservices';
 import { NestFactory } from '@nestjs/core';
 import { join } from 'path';
 import { AppModule } from './app.module';
-import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { CatchAllExceptionFilter } from './common/filters/http-exception.filter';
+import { ConfigService } from '@nestjs/config';
+import { ConfigInterface } from './config';
 
 async function bootstrap() {
-  const app: INestMicroservice = await NestFactory.createMicroservice(
-    AppModule,
-    {
-      transport: Transport.GRPC,
-      options: {
-        url: `${process.env.HOST}:${process.env.PORT}`,
-        package: ['project', 'task'],
-        protoPath: [
-          join('node_modules', 'proto', 'proto-files', 'project.proto'),
-          join('node_modules', 'proto', 'proto-files', 'task.proto'),
-        ],
-      },
+  const app: INestMicroservice = await NestFactory.createMicroservice(AppModule, {
+    transport: Transport.GRPC,
+    options: {
+      url: `${process.env.HOST}:${process.env.PORT}`,
+      package: ['project'],
+      protoPath: [join('node_modules', 'proto', 'proto-files', 'project-service', 'project.proto')],
     },
-  );
+  });
 
-  app.useGlobalFilters(new HttpExceptionFilter());
+  const config = app.get<ConfigService<ConfigInterface>>(ConfigService);
+  app.useGlobalFilters(new CatchAllExceptionFilter(config));
 
   // Validate and Transform Global Pipes
   app.useGlobalPipes(

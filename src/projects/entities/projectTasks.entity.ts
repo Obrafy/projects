@@ -1,11 +1,23 @@
-import mongoose from 'mongoose';
-import { Document } from 'mongoose';
-import { Prop, raw, Schema } from '@nestjs/mongoose';
-import { Task } from 'src/tasks/entities/task.entity';
-@Schema({ _id: false })
-export class ProjectTasks extends Document {
+import mongoose, { Document } from 'mongoose';
+import { Prop, raw } from '@nestjs/mongoose';
+import { Task, TaskDocument } from 'src/tasks/entities/task.entity';
+import { Type } from 'class-transformer';
+
+export type ProjectTasksDocument = ProjectTasks & Document;
+
+export class ProjectTasks {
+  constructor(task: TaskDocument, laborers: string[], fieldsOverrides: Record<string, any>) {
+    this.task = task._id;
+    this.laborers = laborers;
+    this.fieldsOverrides = fieldsOverrides;
+  }
+
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Task' })
+  @Type(() => Task)
   task: Task;
+
+  @Prop()
+  laborers: string[];
 
   @Prop(
     raw({
@@ -17,5 +29,5 @@ export class ProjectTasks extends Document {
       unity: { type: String },
     }),
   )
-  fieldsOverwriters: Record<string, any>;
+  fieldsOverrides: Record<string, any>;
 }

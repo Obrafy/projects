@@ -1,86 +1,163 @@
-import { Controller, HttpStatus, Inject } from '@nestjs/common';
+import { Controller, Inject } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
-import { makeResponse } from 'src/common/service/makeResponse';
-import {
-  CreateProjectRequest,
-  FieldsOverwritersRequest,
-  FindAllTaskOfProjectRequest,
-  FindOneProjectRequest,
-  RemoveProjectRequest,
-  UpdateRequest,
-} from './dto/project.dto';
-import {
-  FindAllResponse,
-  FindAllTaskOfProjectResponse,
-  FindOneResponse,
-  ProjectCreateResponse,
-  PROJECT_SERVICE_NAME,
-  RemoveResponse,
-  UpdateResponse,
-} from './dto/proto/project.pb';
-import { UpdateProjectDto } from './dto/update-project.dto';
+import makeResponse from '../common/helpers/make-response';
 import { ProjectsService } from './projects.service';
+import * as DTO from './dto/project.dto';
+import * as PROTO from '../common/dto/proto/project.pb';
+import { Status } from 'src/common/dto/status.enum';
 
 @Controller()
 export class ProjectsController {
   @Inject(ProjectsService)
   private readonly projectsService: ProjectsService;
 
-  @GrpcMethod(PROJECT_SERVICE_NAME, 'create')
-  private create(
-    createProjectDto: CreateProjectRequest,
-  ): Promise<ProjectCreateResponse> {
-    return this.projectsService.create(createProjectDto);
-  }
+  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'Create')
+  private async create(createProjectDto: DTO.ProjectCreateRequestDto): Promise<PROTO.ProjectCreateResponse> {
+    const projectData = await this.projectsService.create(createProjectDto);
 
-  @GrpcMethod(PROJECT_SERVICE_NAME, 'findAll')
-  private async findAll(): Promise<FindAllResponse> {
-    const result = await this.projectsService.findAll();
-    return makeResponse(HttpStatus.OK, null, result);
-  }
-
-  @GrpcMethod(PROJECT_SERVICE_NAME, 'findOne')
-  private async findOne(
-    payload: FindOneProjectRequest,
-  ): Promise<FindOneResponse> {
-    const result = await this.projectsService.findOne(payload);
-    return makeResponse(HttpStatus.OK, null, result);
-  }
-
-  @GrpcMethod(PROJECT_SERVICE_NAME, 'update')
-  private async update({ id, data }: UpdateRequest): Promise<UpdateResponse> {
-    const result = await this.projectsService.update({
-      id,
-      payload: data as UpdateProjectDto,
+    return makeResponse<PROTO.ProjectCreateResponse>({
+      project: {
+        status: projectData.status,
+        startDate: new Date(projectData.startDate).getTime(),
+        expectedFinishedDate: new Date(projectData.expectedFinishedDate).getTime(),
+        responsible: projectData.responsible,
+        address: projectData.address,
+        projectTask: [],
+        id: projectData._id,
+      },
     });
-    return makeResponse(HttpStatus.OK, null, result);
   }
 
-  @GrpcMethod(PROJECT_SERVICE_NAME, 'remove')
-  private async remove(payload: RemoveProjectRequest): Promise<RemoveResponse> {
+  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'FindAll')
+  private async findAll(): Promise<PROTO.ProjectFindAllResponse> {
+    const projects = await this.projectsService.findAll();
+
+    const result = projects.map((projectData) => {
+      return {
+        project: {
+          status: projectData.status,
+          startDate: new Date(projectData.startDate).getTime(),
+          expectedFinishedDate: new Date(projectData.expectedFinishedDate).getTime(),
+          responsible: projectData.responsible,
+          address: projectData.address,
+          projectTask: [],
+          id: projectData._id,
+        },
+      };
+    });
+
+    return makeResponse<PROTO.ProjectFindAllResponse>(result);
+  }
+
+  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'FindOne')
+  private async findOne(payload: DTO.ProjectFindOneRequestDto): Promise<PROTO.ProjectFindOneResponse> {
+    const projectData = await this.projectsService.findOne(payload);
+
+    return makeResponse<PROTO.ProjectFindOneResponse>({
+      project: {
+        projectTask: [],
+        status: projectData.status,
+        startDate: new Date(projectData.startDate).getTime(),
+        expectedFinishedDate: new Date(projectData.expectedFinishedDate).getTime(),
+        responsible: projectData.responsible,
+        address: projectData.address,
+        id: projectData._id,
+      },
+    });
+  }
+
+  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'ActivateProject')
+  private async activateProject(payload: DTO.ProjectStatusRequestDto): Promise<PROTO.ActivateProjectResponse> {
+    await this.projectsService.changeProjectStatus(payload, Status.ACTIVE);
+    return makeResponse<PROTO.ActivateProjectResponse>(null);
+  }
+
+  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'DeactivateProject')
+  private async deactivateProject(payload: DTO.ProjectStatusRequestDto): Promise<PROTO.DeactivateProjectResponse> {
+    await this.projectsService.changeProjectStatus(payload, Status.INACTIVE);
+    return makeResponse<PROTO.DeactivateProjectResponse>(null);
+  }
+
+  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'Update')
+  private async update({ id, data }: DTO.ProjectUpdateRequestDto): Promise<PROTO.ProjectUpdateResponse> {
+    const projectData = await this.projectsService.update({
+      id,
+      data: data as PROTO.UpdateProjectData,
+    });
+
+    return makeResponse<PROTO.ProjectUpdateResponse>({
+      project: {
+        status: projectData.status,
+        startDate: new Date(projectData.startDate).getTime(),
+        expectedFinishedDate: new Date(projectData.expectedFinishedDate).getTime(),
+        responsible: projectData.responsible,
+        address: projectData.address,
+        id: projectData._id,
+        projectTask: [],
+      },
+    });
+  }
+
+  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'Remove')
+  private async remove(payload: DTO.ProjectRemoveRequestDto): Promise<PROTO.ProjectRemoveResponse> {
     await this.projectsService.remove(payload);
-    return makeResponse(HttpStatus.OK, null, null);
+
+    return makeResponse<PROTO.ProjectRemoveResponse>(null);
   }
 
-  @GrpcMethod(PROJECT_SERVICE_NAME, 'findAllTaskOfProject')
+  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'FindAllTaskOfProject')
   private async findAllTaskOfProject(
-    payload: FindAllTaskOfProjectRequest,
-  ): Promise<FindAllTaskOfProjectResponse> {
-    const result = await this.projectsService.findAllTaskOfProject(payload);
-    return makeResponse(HttpStatus.OK, null, result);
+    payload: DTO.FindAllTaskOfProjectRequestDto,
+  ): Promise<PROTO.FindAllTaskOfProjectResponse> {
+    const taskProjectData = await this.projectsService.findAllTaskOfProject(payload);
+
+    const result = taskProjectData.tasks.map((item) => {
+      const { task } = item;
+
+      return {
+        category: task.category,
+        activity: task.activity,
+        noiseLevel: task.noiseLevel,
+        dirtLevel: task.dirtLevel,
+        description: task.description,
+        unity: task.unity,
+        possibleSkills: task.possibleSkills,
+      };
+    });
+
+    return makeResponse<PROTO.FindAllTaskOfProjectResponse>(result);
   }
 
-  @GrpcMethod(PROJECT_SERVICE_NAME, 'fieldsOverwriters')
-  private async fieldsOverwriters({
+  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'FieldsOverrides')
+  private async fieldsOverrides({
     projectId,
     taskId,
     data,
-  }: FieldsOverwritersRequest): Promise<FindAllTaskOfProjectResponse> {
-    const result = await this.projectsService.fieldsOverwriters({
+  }: DTO.FieldsOverridesRequestDto): Promise<PROTO.FieldsOverridesResponse> {
+    const taskProjectData = await this.projectsService.fieldsOverrides({
       projectId,
       taskId,
-      payload: data,
+      data: data as DTO.FieldsOverridesDataDto,
     });
-    return makeResponse(HttpStatus.OK, null, result);
+
+    const task = taskProjectData.tasks[0].task;
+
+    const result = {
+      category: task.category,
+      activity: task.activity,
+      noiseLevel: task.noiseLevel,
+      dirtLevel: task.dirtLevel,
+      description: task.description,
+      unity: task.unity,
+      possibleSkills: task.possibleSkills,
+    };
+
+    return makeResponse<PROTO.FieldsOverridesResponse>(result);
+  }
+
+  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'AddTasksToProject')
+  private async addTasksToProject(payload: DTO.AddTasksToProjectRequestDto): Promise<PROTO.AddTasksToProjectResponse> {
+    await this.projectsService.addTasksToProject(payload);
+    return makeResponse<PROTO.AddTasksToProjectResponse>(null);
   }
 }

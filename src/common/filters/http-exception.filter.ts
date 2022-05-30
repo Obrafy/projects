@@ -1,33 +1,92 @@
-import {
-  ExceptionFilter,
-  Catch,
-  ArgumentsHost,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
-import { HttpArgumentsHost } from '@nestjs/common/interfaces';
-import { Request, Response } from 'express';
+import { mongo } from 'mongoose';
+import { ConfigInterface } from 'src/config';
+import { ConfigService } from '@nestjs/config';
+import { ExceptionFilter, Catch, HttpException, HttpStatus, Injectable, Inject } from '@nestjs/common';
 
-@Catch(HttpException)
-export class HttpExceptionFilter implements ExceptionFilter {
-  catch(exception: HttpException, host: ArgumentsHost) {
-    const context: HttpArgumentsHost = host.switchToHttp();
+import { getLanguageSpecificErrorMessage } from '../error-messages/error-messages.helpers';
+import { DATABASE_ERROR_MESSAGES_KEYS } from '../error-messages/error-messagens.interface';
 
-    const respose: Response = context.getResponse<Response>();
-    const request: Request = context.getRequest<Request>();
+const DUPLICATE_KEY_MONGO_ERROR_CODE = 11000;
 
-    const httpStatus: HttpStatus = exception.getStatus();
+@Injectable()
+@Catch()
+export class CatchAllExceptionFilter implements ExceptionFilter {
+  constructor(
+    @Inject(ConfigService)
+    private readonly configService: ConfigService<ConfigInterface>,
+  ) {}
 
-    if (httpStatus === HttpStatus.BAD_REQUEST) {
+  catch(exception: unknown) {
+    if (exception instanceof HttpException) {
+      const httpStatus: HttpStatus = exception.getStatus();
+
       const response: any = exception.getResponse();
 
-      return { status: httpStatus, error: response.message };
+      // Translate error messages if possible
+      const errorMessages = [];
+
+      if (Array.isArray(response.message)) {
+        response.message.forEach((r: string) =>
+          errorMessages.push(
+            getLanguageSpecificErrorMessage(this.configService.get('SERVER_LANG', { infer: true }), r) ?? r,
+          ),
+        );
+      } else {
+        errorMessages.push(
+          getLanguageSpecificErrorMessage(this.configService.get('SERVER_LANG', { infer: true }), response.message) ??
+            response.message,
+        );
+      }
+
+      return {
+        status: httpStatus,
+        error: errorMessages,
+        data: null,
+      };
+    }
+    // Handle Mongo Errors
+    if (exception instanceof mongo.MongoError) {
+      // Handle Duplicate Key Errors
+      if (exception.code == DUPLICATE_KEY_MONGO_ERROR_CODE) {
+        let replaceArray = undefined;
+
+        if ((exception as any).keyValue) {
+          replaceArray = [
+            { key: 'key', value: Object.keys((exception as any).keyValue)[0] },
+            {
+              key: 'value',
+              value: Object.values((exception as any).keyValue)[0] as string,
+            },
+          ];
+        }
+
+        return {
+          status: HttpStatus.CONFLICT,
+          error: [
+            getLanguageSpecificErrorMessage(
+              this.configService.get('SERVER_LANG', { infer: true }),
+              DATABASE_ERROR_MESSAGES_KEYS.DUPLICATE_KEY,
+              replaceArray,
+            ),
+          ],
+          data: null,
+        };
+      }
+
+      // Hanle generic database errors
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        error: [exception.message],
+        data: null,
+      };
     }
 
-    respose.status(httpStatus).json({
-      statusCode: httpStatus,
-      timestamp: new Date().toISOString(),
-      path: request.url,
-    });
+    console.log({ exception });
+
+    return {
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+      error: ['An unknown error has occurred. Please check the logs.'],
+      data: null,
+    };
   }
 }

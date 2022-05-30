@@ -1,9 +1,8 @@
 import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { ProjectsModule } from './projects/projects.module';
-
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigInterface, loader, validationSchema } from './config';
 import { TasksModule } from './tasks/tasks.module';
 

@@ -1,145 +1,189 @@
-import {
-  HttpStatus,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
-import {
-  CreateProjectRequest,
-  FindOneProjectRequest,
-  RemoveProjectRequest,
-  FindAllTaskOfProjectRequest,
-} from './dto/project.dto';
-import { Project, ProjectDocument } from './entities/project.entity';
-import { Model } from 'mongoose';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Model, FilterQuery } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import { ClientGrpc } from '@nestjs/microservices';
+import { Project, ProjectDocument } from './entities/project.entity';
 import { Address, AddressDocument } from './entities/address.entity';
 import { TasksService } from 'src/tasks/tasks.service';
+import { UserManagementServiceClient, USER_MANAGEMENT_SERVICE_NAME } from 'src/common/dto/proto/auth.pb';
+import * as DTO from '../projects/dto/project.dto';
+import { PROJECT_ERROR_MESSAGES_KEYS } from 'src/common/error-messages/error-messagens.interface';
+import { Status } from 'src/common/dto/status.enum';
+import * as EXCEPTIONS from '@nestjs/common/exceptions';
+import { ProjectTasks } from './entities/projectTasks.entity';
+import { TaskDocument } from 'src/tasks/entities/task.entity';
 
 @Injectable()
 export class ProjectsService {
+  private userManagementServiceClient: UserManagementServiceClient;
+
   constructor(
     private tasksService: TasksService,
     @InjectModel(Project.name)
     private readonly projectModel: Model<ProjectDocument>,
     @InjectModel(Address.name)
     private readonly addressModel: Model<AddressDocument>,
+
+    @Inject(USER_MANAGEMENT_SERVICE_NAME)
+    private readonly grpcClient: ClientGrpc,
   ) {}
+
+  // Private Methods
+
+  /**
+   * Get an user by id
+   * @param projectId The Project's id
+   * @returns The response Project object
+   */
+  private async _getProjectById(projectId: string): Promise<ProjectDocument> {
+    return this.projectModel.findOne({
+      _id: projectId,
+      status: { $ne: Status.DELETED },
+    });
+  }
+
+  /**
+   * Get all projects
+   * @returns An array of projects objects
+   */
+  private async _getAllProjects(filter: FilterQuery<ProjectDocument> = {}): Promise<ProjectDocument[]> {
+    return this.projectModel.find({ status: { $ne: Status.DELETED }, ...filter });
+  }
+
+  public onModuleInit(): void {
+    this.userManagementServiceClient =
+      this.grpcClient.getService<UserManagementServiceClient>(USER_MANAGEMENT_SERVICE_NAME);
+  }
 
   private readonly logger = new Logger(ProjectsService.name);
 
-  public async create(createProjectDto: CreateProjectRequest) {
+  public async create(createProjectDto: DTO.ProjectCreateRequestDto): Promise<ProjectDocument> {
     this.logger.log('Creating new project');
 
-    const { address, tasks } = createProjectDto;
+    try {
+      const { address, tasks } = createProjectDto;
 
-    const allTasks = tasks.map(async (task) => {
-      const taskCreated = await this.tasksService.create(task);
-      return { task: taskCreated.id };
-    });
+      if (tasks) {
+        await Promise.all(tasks.map((taskId) => this.tasksService.findOne({ id: taskId })));
+      }
 
-    const tasksCreated = await Promise.all(allTasks);
+      let addressObj = await this.addressModel.findOne({ ...address });
 
-    await this.projectModel.create({
-      ...createProjectDto,
-      tasks: tasksCreated,
-    });
+      if (!addressObj) {
+        addressObj = await this.addressModel.create(address);
+      }
 
-    await this.addressModel.create(address);
-
-    return { status: HttpStatus.CREATED, error: null };
+      return await this.projectModel.create({
+        ...createProjectDto,
+        address: addressObj,
+      });
+    } catch (err) {
+      console.error({ err });
+    }
   }
 
-  public async findAll() {
-    this.logger.log('Find all Projects');
-    const queryResult = await this.projectModel.find().exec();
-
-    const result = queryResult.map((project) =>
-      this.MakeProjectResponse(project),
-    );
-    return result;
+  public async findAll(): Promise<ProjectDocument[]> {
+    this.logger.log(this.findAll.name);
+    return await this._getAllProjects();
   }
 
-  public async findOne({ id }: FindOneProjectRequest) {
+  public async findOne({ id }: DTO.ProjectFindOneRequestDto): Promise<ProjectDocument> {
     this.logger.log('Find one  by id', id);
-    const project = await this.projectModel.findOne({ _id: id });
+    const project = await this._getProjectById(id);
 
-    if (!project) {
-      throw new NotFoundException();
-    }
+    if (!project) throw new EXCEPTIONS.NotFoundException(PROJECT_ERROR_MESSAGES_KEYS.PROJECT_NOT_FOUND);
 
-    const result = this.MakeProjectResponse(project);
-    return result;
+    return project;
   }
 
-  public async update({ id, payload }) {
-    await this.projectModel.findOneAndUpdate({ _id: id }, payload);
-    const project = await this.projectModel.findById({ _id: id });
+  public async update({ id, data }: DTO.ProjectUpdateRequestDto): Promise<ProjectDocument> {
+    await this.projectModel.findOneAndUpdate({ _id: id }, data);
 
-    if (!project) {
-      throw new NotFoundException();
-    }
+    const project = await this._getProjectById(id);
+    if (!project) throw new EXCEPTIONS.NotFoundException(PROJECT_ERROR_MESSAGES_KEYS.PROJECT_NOT_FOUND);
 
-    const result = this.MakeProjectResponse(project);
-    return result;
+    return project;
   }
 
-  public async remove({ id }: RemoveProjectRequest) {
+  public async remove({ id }: DTO.ProjectRemoveRequestDto) {
     this.logger.log('Remove Project by ID', id);
-    await this.projectModel.findOneAndDelete({ _id: id });
+
+    const project = await this._getProjectById(id);
+    if (!project) throw new EXCEPTIONS.NotFoundException(PROJECT_ERROR_MESSAGES_KEYS.PROJECT_NOT_FOUND);
+
+    project.status = Status.DELETED;
+
+    await project.save();
   }
 
-  public async findAllTaskOfProject({ id }: FindAllTaskOfProjectRequest) {
+  public async findAllTaskOfProject({ id }: DTO.FindAllTaskOfProjectRequestDto) {
     this.logger.log('Find Tasks one project by id', id);
+
     const project = await (
       await this.projectModel.findOne({ _id: id }, { tasks: 1 })
     ).populate({
       path: 'tasks.task',
     });
 
+    if (!project) throw new EXCEPTIONS.NotFoundException(PROJECT_ERROR_MESSAGES_KEYS.PROJECT_NOT_FOUND);
+
+    return project;
+  }
+
+  public async fieldsOverrides({ projectId, taskId, data }: DTO.FieldsOverridesRequestDto): Promise<ProjectDocument> {
+    this.logger.log('Make fields Overrides', data);
+
+    const project = await this._getProjectById(projectId);
+
+    const projectTask = project.tasks.find(({ task }) => (task as TaskDocument)._id === taskId);
+    projectTask.fieldsOverrides = data;
+    return project.save();
+  }
+
+  public async changeProjectStatus(payload: DTO.ProjectStatusRequestDto, status: Status): Promise<void> {
+    this.logger.log(this.changeProjectStatus.name, payload);
+    const project = await this._getProjectById(payload.projectId);
+
     if (!project) {
-      throw new NotFoundException();
+      throw new EXCEPTIONS.NotFoundException(PROJECT_ERROR_MESSAGES_KEYS.PROJECT_NOT_FOUND);
     }
 
-    const result = project.tasks.map((item) => {
-      return {
-        category: item.task.category,
-        activity: item.task.activity,
-        noiseLevel: item.task.noiseLevel,
-        dirtLevel: item.task.dirtLevel,
-        description: item.task.description,
-        unity: item.task.unity,
-      };
-    });
+    project.status = status;
 
-    return result;
+    await project.save();
   }
 
-  public async fieldsOverwriters({ projectId, taskId, payload }) {
-    await this.projectModel.updateOne(
-      {
-        _id: projectId,
-        'tasks.task': taskId,
-      },
-      { $set: { 'tasks.$.fieldsOverwrite': payload } },
+  public async addTasksToProject(payload: DTO.AddTasksToProjectRequestDto): Promise<void> {
+    this.logger.log(this.addTasksToProject.name, payload);
+
+    const project = await this._getProjectById(payload.projectId);
+
+    if (!project) {
+      throw new EXCEPTIONS.NotFoundException(PROJECT_ERROR_MESSAGES_KEYS.PROJECT_NOT_FOUND);
+    }
+
+    const { tasksIds } = payload;
+
+    const hasTaskAlreadyAssigned = project.tasks.filter(
+      (projectTask) =>
+        tasksIds.indexOf(
+          typeof projectTask.task === 'string' ? projectTask.task : (projectTask.task as TaskDocument)._id,
+        ) === -1,
     );
 
-    const project = await this.projectModel.findOne({ _id: projectId });
-    return this.MakeProjectResponse(project);
-  }
+    if (hasTaskAlreadyAssigned.length > 0) {
+      throw new EXCEPTIONS.NotFoundException(PROJECT_ERROR_MESSAGES_KEYS.PROJECT_TASK_ALREADY_ASSIGNED);
+    }
 
-  private MakeProjectResponse(
-    project: Project &
-      import('mongoose').Document<any, any, any> & { _id: any },
-  ) {
-    return {
-      status: project.status,
-      startDate: new Date(project.startDate).getTime(),
-      expectedFinishedDate: new Date(project.startDate).getTime(),
-      responsible: project.responsible,
-      address: project.address,
-      /** repeated ProjectTasks tasks = 7; */
-      id: project._id,
-    };
+    const projectTasks = await Promise.all(
+      tasksIds.map(async (taskId) => {
+        const task = await this.tasksService.findOne({ id: taskId });
+        return new ProjectTasks(task, [], {});
+      }),
+    );
+
+    project.tasks = [...project.tasks, ...projectTasks];
+
+    await project.save();
   }
 }

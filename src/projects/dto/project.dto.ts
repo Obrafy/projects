@@ -1,102 +1,125 @@
 import { Type } from 'class-transformer';
-import {
-  IsDateString,
-  IsString,
-  IsNotEmpty,
-  ValidateNested,
-  IsObject,
-} from 'class-validator';
-import { CreateTaskDto } from 'src/tasks/dto/create-task.dto';
+import { IsDateString, IsString, IsNotEmpty, ValidateNested, IsEnum, IsOptional, IsMongoId } from 'class-validator';
 
-class Address {
-  @IsString()
-  zipCode: string;
-  @IsString()
-  street: string;
-  @IsString()
-  number: string;
-  @IsString()
-  neighborhood: string;
-  @IsString()
-  city: string;
-  @IsString()
-  state: string;
-}
+import { Address } from './address.dto';
+import * as PROTO from '../../common/dto/proto/project.pb';
+import { PartialBy } from 'src/common/types/global';
 
-export class CreateProjectRequest {
-  id: string;
-  status: string;
-
+export class ProjectCreateRequestDto implements PartialBy<PROTO.ProjectCreateRequest, 'tasks'> {
   @IsNotEmpty()
-  startDate: Date;
-
-  endDate: Date;
+  startDate: string;
 
   @IsDateString()
   @IsNotEmpty()
-  expectedFinishedDate;
+  expectedFinishedDate: string;
 
   @IsString()
   responsible: string;
 
-  @IsNotEmpty()
   @Type(() => Address)
   @ValidateNested()
+  @IsNotEmpty()
   address: Address;
 
-  @Type(() => CreateTaskDto)
+  @IsMongoId({ each: true })
+  @IsOptional()
+  tasks?: string[];
+}
+
+export class ProjectFindAllRequestDto implements PROTO.ProjectFindAllRequest {}
+
+export class ProjectFindOneRequestDto implements PROTO.ProjectFindOneRequest {
+  @IsString()
+  public readonly id: string;
+}
+
+export class UpdateProjectDataDto implements PROTO.UpdateProjectData {
+  expectedFinishedDate?: string;
+  startDate?: string;
+  status?: PROTO.Status;
+
+  @IsString()
+  responsible?: string;
+}
+
+export class ProjectUpdateRequestDto implements PROTO.ProjectUpdateRequest {
+  @IsString()
+  public readonly id: string;
+
+  @Type(() => UpdateProjectDataDto)
   @ValidateNested()
-  @IsNotEmpty()
-  tasks: CreateTaskDto[];
+  data: UpdateProjectDataDto;
 }
 
-export class FindOneProjectRequest {
+export class ProjectRemoveRequestDto implements PROTO.ProjectRemoveRequest {
   @IsString()
   public readonly id: string;
 }
 
-export class UpdateRequest {
-  @IsString()
-  public readonly id: string;
-
-  @IsObject()
-  public readonly data: any;
-}
-
-export class RemoveProjectRequest {
+export class FindAllTaskOfProjectRequestDto implements PROTO.FindAllTaskOfProjectRequest {
   @IsString()
   public readonly id: string;
 }
 
-export class FindAllTaskOfProjectRequest {
-  @IsString()
-  public readonly id: string;
+enum LevelType {
+  'LOW' = 'LOW',
+  'HIGH' = 'HIGH',
 }
 
-class FieldsOverwrite {
+enum UnityType {
+  'VB' = 'VB',
+  'M2' = 'M²',
+  'UNID' = 'UNID',
+}
+
+export class FieldsOverridesDataDto implements PROTO.FieldsOverrides {
   @IsString()
+  @IsOptional()
   category: string;
+
   @IsString()
+  @IsOptional()
   activity: string;
+
   @IsString()
+  @IsOptional()
   description: string;
-  @IsString()
-  noiseLevel: string;
-  @IsString()
-  dirtLevel: string;
-  @IsString()
-  unity: string;
+
+  @IsEnum(LevelType)
+  @IsOptional()
+  noiseLevel: LevelType;
+
+  @IsEnum(LevelType)
+  @IsOptional()
+  dirtLevel: LevelType;
+
+  @IsEnum(UnityType)
+  @IsOptional()
+  unity: UnityType;
 }
 
-export class FieldsOverwritersRequest {
+export class FieldsOverridesRequestDto implements PROTO.FieldsOverridesRequest {
   @IsString()
   public readonly projectId: string;
 
   @IsString()
   public readonly taskId: string;
 
-  @Type(() => FieldsOverwrite)
+  @Type(() => FieldsOverridesDataDto)
   @ValidateNested()
-  // @IsNotEmpty()
-  public readonly data: FieldsOverwrite;
+  @IsNotEmpty()
+  public readonly data: FieldsOverridesDataDto;
+}
+
+export class ProjectStatusRequestDto implements PROTO.ActivateProjectRequest, PROTO.DeactivateProjectRequest {
+  @IsMongoId()
+  projectId: string;
+}
+
+export class AddTasksToProjectRequestDto implements PROTO.AddTasksToProjectRequest {
+  @IsMongoId()
+  projectId: string;
+
+  @IsMongoId({ each: true })
+  tasksIds: string[];
 }

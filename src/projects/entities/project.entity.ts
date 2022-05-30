@@ -2,19 +2,14 @@ import mongoose, { Document } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Address } from './address.entity';
 import { ProjectTasks } from './projectTasks.entity';
-
-enum StatusType {
-  START = 'start',
-  FINISHED = 'finished',
-  IN_PROGRESS = 'in-progress',
-}
+import { Status } from 'src/common/dto/status.enum';
 
 export type ProjectDocument = Project & Document;
 
 @Schema()
 export class Project {
-  @Prop({ type: String, enum: StatusType, default: StatusType.START })
-  status: string;
+  @Prop({ required: false, default: Status.ACTIVE })
+  status: Status;
 
   @Prop({ type: Date, default: Date.now })
   startDate: Date;
@@ -31,7 +26,7 @@ export class Project {
   @Prop({ type: mongoose.Types.ObjectId, ref: 'Address' })
   address: Address;
 
-  @Prop([ProjectTasks])
+  @Prop({ instance: [ProjectTasks], required: false })
   tasks: ProjectTasks[];
 }
 
