@@ -7,6 +7,7 @@ import {
   IsArray,
   IsNotEmpty,
   ValidateNested,
+  IsMongoId,
 } from 'class-validator';
 import { TransformEnum } from 'src/common/decorators/transform-enum.decorator';
 import {
@@ -19,6 +20,9 @@ import {
   PossibleSkills,
   LevelType as ProtoLevelType,
   UnityType as ProtoUnitType,
+  DeactivateTaskRequest,
+  ActivateTaskRequest,
+  AddSkillToTaskRequest,
 } from 'src/common/dto/proto/project.pb';
 
 enum LevelType {
@@ -54,15 +58,12 @@ export class TaskCreateRequestDto implements TaskCreateRequest {
   @TransformEnum(UnityType, ProtoUnitType)
   unity: UnityType;
 
-  @IsString({ each: true })
-  laborers: string[];
-
   @Type(() => PossibleSkillsDto)
   @ValidateNested()
   possibleSkills: PossibleSkillsDto[];
 }
 class PossibleSkillsDto implements PossibleSkills {
-  @IsString()
+  @IsMongoId()
   skillId: string;
 
   @IsNumber()
@@ -72,12 +73,12 @@ class PossibleSkillsDto implements PossibleSkills {
 export class TaskFindAllRequestDto implements TaskFindAllRequest {}
 
 export class TaskFindOneRequestDto implements TaskFindOneRequest {
-  @IsString()
+  @IsMongoId()
   public readonly id: string;
 }
 
 export class TaskUpdateRequestDto implements TaskUpdateRequest {
-  @IsString()
+  @IsMongoId()
   public readonly id: string;
 
   // @Type(() => TaskUpdateData)
@@ -86,7 +87,7 @@ export class TaskUpdateRequestDto implements TaskUpdateRequest {
 }
 
 export class TaskRemoveRequestDto implements TaskRemoveRequest {
-  @IsString()
+  @IsMongoId()
   public readonly id: string;
 }
 
@@ -118,4 +119,17 @@ export class TaskDto {
   @Type(() => PossibleSkillsDto)
   @ValidateNested()
   possibleSkills: PossibleSkillsDto[];
+}
+
+export class TaskStatusRequestDto implements ActivateTaskRequest, DeactivateTaskRequest {
+  @IsMongoId()
+  taskId: string;
+}
+
+export class AddSkillToTaskRequestDto implements AddSkillToTaskRequest {
+  @IsMongoId()
+  taskId: string;
+
+  @IsMongoId({ each: true })
+  skillsIds: string[];
 }

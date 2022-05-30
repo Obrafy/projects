@@ -15,7 +15,12 @@ enum UnityType {
   'UNID' = 'UNID',
 }
 
-class PossibleSkills {
+export class PossibleSkills {
+  constructor(skillId, requiredSkillLevel) {
+    this.skillId = skillId;
+    this.requiredSkillLevel = requiredSkillLevel;
+  }
+
   @Prop()
   skillId: string;
 
