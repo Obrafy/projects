@@ -7,10 +7,7 @@ import { Project, ProjectSchema } from './entities/project.entity';
 import { Address, AddressSchema } from './entities/address.entity';
 import { TasksModule } from 'src/tasks/tasks.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import {
-  AUTH_PACKAGE_NAME,
-  USER_MANAGEMENT_SERVICE_NAME,
-} from 'src/common/dto/proto/auth.pb';
+import { AUTH_PACKAGE_NAME, USER_MANAGEMENT_SERVICE_NAME } from 'src/common/dto/proto/auth.pb';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ConfigInterface } from 'src/config';
 import { makeMicroserviceUrl } from 'src/common/helpers/make-microservice';
@@ -41,13 +38,7 @@ import { makeMicroserviceUrl } from 'src/common/helpers/make-microservice';
               configService.get('AUTHENTICATION_PORT', { infer: true }),
             ),
             package: AUTH_PACKAGE_NAME,
-            protoPath: join(
-              'node_modules',
-              'proto',
-              'proto-files',
-              'authentication-service',
-              'auth.proto',
-            ),
+            protoPath: join('node_modules', 'proto', 'proto-files', 'authentication-service', 'auth.proto'),
           },
         }),
         inject: [ConfigService],

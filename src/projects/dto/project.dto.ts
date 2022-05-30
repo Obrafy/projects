@@ -1,21 +1,11 @@
 import { Type } from 'class-transformer';
-import {
-  IsDateString,
-  IsString,
-  IsNotEmpty,
-  ValidateNested,
-  IsEnum,
-  IsOptional,
-  IsMongoId,
-} from 'class-validator';
+import { IsDateString, IsString, IsNotEmpty, ValidateNested, IsEnum, IsOptional, IsMongoId } from 'class-validator';
 
 import { Address } from './address.dto';
 import * as PROTO from '../../common/dto/proto/project.pb';
 import { PartialBy } from 'src/common/types/global';
 
-export class ProjectCreateRequestDto
-  implements PartialBy<PROTO.ProjectCreateRequest, 'tasks'>
-{
+export class ProjectCreateRequestDto implements PartialBy<PROTO.ProjectCreateRequest, 'tasks'> {
   @IsNotEmpty()
   startDate: string;
 
@@ -66,9 +56,7 @@ export class ProjectRemoveRequestDto implements PROTO.ProjectRemoveRequest {
   public readonly id: string;
 }
 
-export class FindAllTaskOfProjectRequestDto
-  implements PROTO.FindAllTaskOfProjectRequest
-{
+export class FindAllTaskOfProjectRequestDto implements PROTO.FindAllTaskOfProjectRequest {
   @IsString()
   public readonly id: string;
 }
@@ -123,9 +111,15 @@ export class FieldsOverridesRequestDto implements PROTO.FieldsOverridesRequest {
   public readonly data: FieldsOverridesDataDto;
 }
 
-export class ProjectStatusRequestDto
-  implements PROTO.ActivateProjectRequest, PROTO.DeactivateProjectRequest
-{
+export class ProjectStatusRequestDto implements PROTO.ActivateProjectRequest, PROTO.DeactivateProjectRequest {
   @IsMongoId()
   projectId: string;
+}
+
+export class AddTasksToProjectRequestDto implements PROTO.AddTasksToProjectRequest {
+  @IsMongoId()
+  projectId: string;
+
+  @IsMongoId({ each: true })
+  tasksIds: string[];
 }

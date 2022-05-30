@@ -1,9 +1,9 @@
 import { Controller, Inject } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import makeResponse from '../common/helpers/make-response';
-import * as PROTO from '../common/dto/proto/project.pb';
 import { ProjectsService } from './projects.service';
 import * as DTO from './dto/project.dto';
+import * as PROTO from '../common/dto/proto/project.pb';
 import { Status } from 'src/common/dto/status.enum';
 
 @Controller()
@@ -11,7 +11,7 @@ export class ProjectsController {
   @Inject(ProjectsService)
   private readonly projectsService: ProjectsService;
 
-  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'create')
+  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'Create')
   private async create(createProjectDto: DTO.ProjectCreateRequestDto): Promise<PROTO.ProjectCreateResponse> {
     const projectData = await this.projectsService.create(createProjectDto);
 
@@ -28,7 +28,7 @@ export class ProjectsController {
     });
   }
 
-  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'findAll')
+  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'FindAll')
   private async findAll(): Promise<PROTO.ProjectFindAllResponse> {
     const projects = await this.projectsService.findAll();
 
@@ -49,7 +49,7 @@ export class ProjectsController {
     return makeResponse<PROTO.ProjectFindAllResponse>(result);
   }
 
-  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'findOne')
+  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'FindOne')
   private async findOne(payload: DTO.ProjectFindOneRequestDto): Promise<PROTO.ProjectFindOneResponse> {
     const projectData = await this.projectsService.findOne(payload);
 
@@ -66,19 +66,19 @@ export class ProjectsController {
     });
   }
 
-  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'activateProject')
+  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'ActivateProject')
   private async activateProject(payload: DTO.ProjectStatusRequestDto): Promise<PROTO.ActivateProjectResponse> {
     await this.projectsService.changeProjectStatus(payload, Status.ACTIVE);
     return makeResponse<PROTO.ActivateProjectResponse>(null);
   }
 
-  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'deactivateProject')
+  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'DeactivateProject')
   private async deactivateProject(payload: DTO.ProjectStatusRequestDto): Promise<PROTO.DeactivateProjectResponse> {
     await this.projectsService.changeProjectStatus(payload, Status.INACTIVE);
     return makeResponse<PROTO.DeactivateProjectResponse>(null);
   }
 
-  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'update')
+  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'Update')
   private async update({ id, data }: DTO.ProjectUpdateRequestDto): Promise<PROTO.ProjectUpdateResponse> {
     const projectData = await this.projectsService.update({
       id,
@@ -98,14 +98,14 @@ export class ProjectsController {
     });
   }
 
-  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'remove')
+  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'Remove')
   private async remove(payload: DTO.ProjectRemoveRequestDto): Promise<PROTO.ProjectRemoveResponse> {
     await this.projectsService.remove(payload);
 
     return makeResponse<PROTO.ProjectRemoveResponse>(null);
   }
 
-  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'findAllTaskOfProject')
+  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'FindAllTaskOfProject')
   private async findAllTaskOfProject(
     payload: DTO.FindAllTaskOfProjectRequestDto,
   ): Promise<PROTO.FindAllTaskOfProjectResponse> {
@@ -128,7 +128,7 @@ export class ProjectsController {
     return makeResponse<PROTO.FindAllTaskOfProjectResponse>(result);
   }
 
-  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'fieldsOverrides')
+  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'FieldsOverrides')
   private async fieldsOverrides({
     projectId,
     taskId,
@@ -153,5 +153,11 @@ export class ProjectsController {
     };
 
     return makeResponse<PROTO.FieldsOverridesResponse>(result);
+  }
+
+  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'AddTasksToProject')
+  private async addTasksToProject(payload: DTO.AddTasksToProjectRequestDto): Promise<PROTO.AddTasksToProjectResponse> {
+    await this.projectsService.addTasksToProject(payload);
+    return makeResponse<PROTO.AddTasksToProjectResponse>(null);
   }
 }
