@@ -11,10 +11,7 @@ export const getLanguageSpecificErrorMessage = (
   errorMessageKey: string,
   replaceablePairs?: { key: string; value: string }[],
 ) => {
-  const errorMessage: string = _.get(
-    langFiles[languageToFileNameMap[language]],
-    errorMessageKey,
-  );
+  const errorMessage: string = _.get(langFiles[languageToFileNameMap[language]], errorMessageKey);
 
   if (replaceablePairs) {
     return replaceablePairs.reduce((currErrorMessage, rp) => {

@@ -459,50 +459,24 @@ export interface AuthServiceClient {
 /** Authentication Service */
 
 export interface AuthServiceController {
-  register(
-    request: RegisterRequest,
-  ):
-    | Promise<RegisterResponse>
-    | Observable<RegisterResponse>
-    | RegisterResponse;
+  register(request: RegisterRequest): Promise<RegisterResponse> | Observable<RegisterResponse> | RegisterResponse;
 
-  login(
-    request: LoginRequest,
-  ): Promise<LoginResponse> | Observable<LoginResponse> | LoginResponse;
+  login(request: LoginRequest): Promise<LoginResponse> | Observable<LoginResponse> | LoginResponse;
 
-  validate(
-    request: ValidateRequest,
-  ):
-    | Promise<ValidateResponse>
-    | Observable<ValidateResponse>
-    | ValidateResponse;
+  validate(request: ValidateRequest): Promise<ValidateResponse> | Observable<ValidateResponse> | ValidateResponse;
 }
 
 export function AuthServiceControllerMethods() {
   return function (constructor: Function) {
     const grpcMethods: string[] = ['register', 'login', 'validate'];
     for (const method of grpcMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(
-        constructor.prototype,
-        method,
-      );
-      GrpcMethod('AuthService', method)(
-        constructor.prototype[method],
-        method,
-        descriptor,
-      );
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      GrpcMethod('AuthService', method)(constructor.prototype[method], method, descriptor);
     }
     const grpcStreamMethods: string[] = [];
     for (const method of grpcStreamMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(
-        constructor.prototype,
-        method,
-      );
-      GrpcStreamMethod('AuthService', method)(
-        constructor.prototype[method],
-        method,
-        descriptor,
-      );
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      GrpcStreamMethod('AuthService', method)(constructor.prototype[method], method, descriptor);
     }
   };
 }
@@ -516,39 +490,25 @@ export interface UserManagementServiceClient {
 
   findUserById(request: FindUserByIdRequest): Observable<FindUserByIdResponse>;
 
-  removeUserById(
-    request: RemoveUserByIdRequest,
-  ): Observable<RemoveUserByIdResponse>;
+  removeUserById(request: RemoveUserByIdRequest): Observable<RemoveUserByIdResponse>;
 
-  findUserByEmail(
-    request: FindUserByEmailRequest,
-  ): Observable<FindUserByEmailResponse>;
+  findUserByEmail(request: FindUserByEmailRequest): Observable<FindUserByEmailResponse>;
 
   findAllUsers(request: FindAllUsersRequest): Observable<FindAllUsersResponse>;
 
-  findAllUsersForRoles(
-    request: FindAllUsersForRolesRequest,
-  ): Observable<FindAllUsersForRolesResponse>;
+  findAllUsersForRoles(request: FindAllUsersForRolesRequest): Observable<FindAllUsersForRolesResponse>;
 
   /** User Status Mangement */
 
-  activateUserById(
-    request: ActivateUserByIdRequest,
-  ): Observable<ActivateUserByIdResponse>;
+  activateUserById(request: ActivateUserByIdRequest): Observable<ActivateUserByIdResponse>;
 
-  deactivateUserById(
-    request: DeactivateUserByIdRequest,
-  ): Observable<DeactivateUserByIdResponse>;
+  deactivateUserById(request: DeactivateUserByIdRequest): Observable<DeactivateUserByIdResponse>;
 
   /** User Role Management */
 
-  addRoleToUser(
-    request: AddRoleToUserRequest,
-  ): Observable<AddRoleToUserResponse>;
+  addRoleToUser(request: AddRoleToUserRequest): Observable<AddRoleToUserResponse>;
 
-  removeRoleFromUser(
-    request: RemoveRoleFromUserRequest,
-  ): Observable<RemoveRoleFromUserResponse>;
+  removeRoleFromUser(request: RemoveRoleFromUserRequest): Observable<RemoveRoleFromUserResponse>;
 }
 
 /** User Management Service */
@@ -558,70 +518,43 @@ export interface UserManagementServiceController {
 
   findUserById(
     request: FindUserByIdRequest,
-  ):
-    | Promise<FindUserByIdResponse>
-    | Observable<FindUserByIdResponse>
-    | FindUserByIdResponse;
+  ): Promise<FindUserByIdResponse> | Observable<FindUserByIdResponse> | FindUserByIdResponse;
 
   removeUserById(
     request: RemoveUserByIdRequest,
-  ):
-    | Promise<RemoveUserByIdResponse>
-    | Observable<RemoveUserByIdResponse>
-    | RemoveUserByIdResponse;
+  ): Promise<RemoveUserByIdResponse> | Observable<RemoveUserByIdResponse> | RemoveUserByIdResponse;
 
   findUserByEmail(
     request: FindUserByEmailRequest,
-  ):
-    | Promise<FindUserByEmailResponse>
-    | Observable<FindUserByEmailResponse>
-    | FindUserByEmailResponse;
+  ): Promise<FindUserByEmailResponse> | Observable<FindUserByEmailResponse> | FindUserByEmailResponse;
 
   findAllUsers(
     request: FindAllUsersRequest,
-  ):
-    | Promise<FindAllUsersResponse>
-    | Observable<FindAllUsersResponse>
-    | FindAllUsersResponse;
+  ): Promise<FindAllUsersResponse> | Observable<FindAllUsersResponse> | FindAllUsersResponse;
 
   findAllUsersForRoles(
     request: FindAllUsersForRolesRequest,
-  ):
-    | Promise<FindAllUsersForRolesResponse>
-    | Observable<FindAllUsersForRolesResponse>
-    | FindAllUsersForRolesResponse;
+  ): Promise<FindAllUsersForRolesResponse> | Observable<FindAllUsersForRolesResponse> | FindAllUsersForRolesResponse;
 
   /** User Status Mangement */
 
   activateUserById(
     request: ActivateUserByIdRequest,
-  ):
-    | Promise<ActivateUserByIdResponse>
-    | Observable<ActivateUserByIdResponse>
-    | ActivateUserByIdResponse;
+  ): Promise<ActivateUserByIdResponse> | Observable<ActivateUserByIdResponse> | ActivateUserByIdResponse;
 
   deactivateUserById(
     request: DeactivateUserByIdRequest,
-  ):
-    | Promise<DeactivateUserByIdResponse>
-    | Observable<DeactivateUserByIdResponse>
-    | DeactivateUserByIdResponse;
+  ): Promise<DeactivateUserByIdResponse> | Observable<DeactivateUserByIdResponse> | DeactivateUserByIdResponse;
 
   /** User Role Management */
 
   addRoleToUser(
     request: AddRoleToUserRequest,
-  ):
-    | Promise<AddRoleToUserResponse>
-    | Observable<AddRoleToUserResponse>
-    | AddRoleToUserResponse;
+  ): Promise<AddRoleToUserResponse> | Observable<AddRoleToUserResponse> | AddRoleToUserResponse;
 
   removeRoleFromUser(
     request: RemoveRoleFromUserRequest,
-  ):
-    | Promise<RemoveRoleFromUserResponse>
-    | Observable<RemoveRoleFromUserResponse>
-    | RemoveRoleFromUserResponse;
+  ): Promise<RemoveRoleFromUserResponse> | Observable<RemoveRoleFromUserResponse> | RemoveRoleFromUserResponse;
 }
 
 export function UserManagementServiceControllerMethods() {
@@ -638,27 +571,13 @@ export function UserManagementServiceControllerMethods() {
       'removeRoleFromUser',
     ];
     for (const method of grpcMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(
-        constructor.prototype,
-        method,
-      );
-      GrpcMethod('UserManagementService', method)(
-        constructor.prototype[method],
-        method,
-        descriptor,
-      );
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      GrpcMethod('UserManagementService', method)(constructor.prototype[method], method, descriptor);
     }
     const grpcStreamMethods: string[] = [];
     for (const method of grpcStreamMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(
-        constructor.prototype,
-        method,
-      );
-      GrpcStreamMethod('UserManagementService', method)(
-        constructor.prototype[method],
-        method,
-        descriptor,
-      );
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      GrpcStreamMethod('UserManagementService', method)(constructor.prototype[method], method, descriptor);
     }
   };
 }
@@ -670,37 +589,23 @@ export const USER_MANAGEMENT_SERVICE_NAME = 'UserManagementService';
 export interface SkillManagementServiceClient {
   /** Skill Category Management */
 
-  addSkillCategory(
-    request: AddSkillCategoryRequest,
-  ): Observable<AddSkillCategoryResponse>;
+  addSkillCategory(request: AddSkillCategoryRequest): Observable<AddSkillCategoryResponse>;
 
-  findSkillCategoryById(
-    request: FindSkillCategoryByIdRequest,
-  ): Observable<FindSkillCategoryByIdResponse>;
+  findSkillCategoryById(request: FindSkillCategoryByIdRequest): Observable<FindSkillCategoryByIdResponse>;
 
-  findSkillCategoryByName(
-    request: FindSkillCategoryByNameRequest,
-  ): Observable<FindSkillCategoryByNameResponse>;
+  findSkillCategoryByName(request: FindSkillCategoryByNameRequest): Observable<FindSkillCategoryByNameResponse>;
 
-  findAllSkillCategories(
-    request: FindAllSkillCategoriesRequest,
-  ): Observable<FindAllSkillCategoriesResponse>;
+  findAllSkillCategories(request: FindAllSkillCategoriesRequest): Observable<FindAllSkillCategoriesResponse>;
 
   /** Skill Management */
 
   addSkill(request: AddSkillRequest): Observable<AddSkillResponse>;
 
-  findSkillById(
-    request: FindSkillByIdRequest,
-  ): Observable<FindSkillByIdResponse>;
+  findSkillById(request: FindSkillByIdRequest): Observable<FindSkillByIdResponse>;
 
-  findSkillByName(
-    request: FindSkillByNameRequest,
-  ): Observable<FindSkillByNameResponse>;
+  findSkillByName(request: FindSkillByNameRequest): Observable<FindSkillByNameResponse>;
 
-  findAllSkills(
-    request: FindAllSkillsRequest,
-  ): Observable<FindAllSkillsResponse>;
+  findAllSkills(request: FindAllSkillsRequest): Observable<FindAllSkillsResponse>;
 
   findAllSkillsForCategories(
     request: FindAllSkillsForCategoriesRequest,
@@ -714,17 +619,11 @@ export interface SkillManagementServiceController {
 
   addSkillCategory(
     request: AddSkillCategoryRequest,
-  ):
-    | Promise<AddSkillCategoryResponse>
-    | Observable<AddSkillCategoryResponse>
-    | AddSkillCategoryResponse;
+  ): Promise<AddSkillCategoryResponse> | Observable<AddSkillCategoryResponse> | AddSkillCategoryResponse;
 
   findSkillCategoryById(
     request: FindSkillCategoryByIdRequest,
-  ):
-    | Promise<FindSkillCategoryByIdResponse>
-    | Observable<FindSkillCategoryByIdResponse>
-    | FindSkillCategoryByIdResponse;
+  ): Promise<FindSkillCategoryByIdResponse> | Observable<FindSkillCategoryByIdResponse> | FindSkillCategoryByIdResponse;
 
   findSkillCategoryByName(
     request: FindSkillCategoryByNameRequest,
@@ -742,33 +641,19 @@ export interface SkillManagementServiceController {
 
   /** Skill Management */
 
-  addSkill(
-    request: AddSkillRequest,
-  ):
-    | Promise<AddSkillResponse>
-    | Observable<AddSkillResponse>
-    | AddSkillResponse;
+  addSkill(request: AddSkillRequest): Promise<AddSkillResponse> | Observable<AddSkillResponse> | AddSkillResponse;
 
   findSkillById(
     request: FindSkillByIdRequest,
-  ):
-    | Promise<FindSkillByIdResponse>
-    | Observable<FindSkillByIdResponse>
-    | FindSkillByIdResponse;
+  ): Promise<FindSkillByIdResponse> | Observable<FindSkillByIdResponse> | FindSkillByIdResponse;
 
   findSkillByName(
     request: FindSkillByNameRequest,
-  ):
-    | Promise<FindSkillByNameResponse>
-    | Observable<FindSkillByNameResponse>
-    | FindSkillByNameResponse;
+  ): Promise<FindSkillByNameResponse> | Observable<FindSkillByNameResponse> | FindSkillByNameResponse;
 
   findAllSkills(
     request: FindAllSkillsRequest,
-  ):
-    | Promise<FindAllSkillsResponse>
-    | Observable<FindAllSkillsResponse>
-    | FindAllSkillsResponse;
+  ): Promise<FindAllSkillsResponse> | Observable<FindAllSkillsResponse> | FindAllSkillsResponse;
 
   findAllSkillsForCategories(
     request: FindAllSkillsForCategoriesRequest,
@@ -792,27 +677,13 @@ export function SkillManagementServiceControllerMethods() {
       'findAllSkillsForCategories',
     ];
     for (const method of grpcMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(
-        constructor.prototype,
-        method,
-      );
-      GrpcMethod('SkillManagementService', method)(
-        constructor.prototype[method],
-        method,
-        descriptor,
-      );
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      GrpcMethod('SkillManagementService', method)(constructor.prototype[method], method, descriptor);
     }
     const grpcStreamMethods: string[] = [];
     for (const method of grpcStreamMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(
-        constructor.prototype,
-        method,
-      );
-      GrpcStreamMethod('SkillManagementService', method)(
-        constructor.prototype[method],
-        method,
-        descriptor,
-      );
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      GrpcStreamMethod('SkillManagementService', method)(constructor.prototype[method], method, descriptor);
     }
   };
 }

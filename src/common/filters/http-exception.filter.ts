@@ -1,14 +1,7 @@
 import { mongo } from 'mongoose';
 import { ConfigInterface } from 'src/config';
 import { ConfigService } from '@nestjs/config';
-import {
-  ExceptionFilter,
-  Catch,
-  HttpException,
-  HttpStatus,
-  Injectable,
-  Inject,
-} from '@nestjs/common';
+import { ExceptionFilter, Catch, HttpException, HttpStatus, Injectable, Inject } from '@nestjs/common';
 
 import { getLanguageSpecificErrorMessage } from '../error-messages/error-messages.helpers';
 import { DATABASE_ERROR_MESSAGES_KEYS } from '../error-messages/error-messagens.interface';
@@ -35,18 +28,13 @@ export class CatchAllExceptionFilter implements ExceptionFilter {
       if (Array.isArray(response.message)) {
         response.message.forEach((r: string) =>
           errorMessages.push(
-            getLanguageSpecificErrorMessage(
-              this.configService.get('SERVER_LANG', { infer: true }),
-              r,
-            ) ?? r,
+            getLanguageSpecificErrorMessage(this.configService.get('SERVER_LANG', { infer: true }), r) ?? r,
           ),
         );
       } else {
         errorMessages.push(
-          getLanguageSpecificErrorMessage(
-            this.configService.get('SERVER_LANG', { infer: true }),
+          getLanguageSpecificErrorMessage(this.configService.get('SERVER_LANG', { infer: true }), response.message) ??
             response.message,
-          ) ?? response.message,
         );
       }
 
@@ -92,6 +80,8 @@ export class CatchAllExceptionFilter implements ExceptionFilter {
         data: null,
       };
     }
+
+    console.log({ exception });
 
     return {
       status: HttpStatus.INTERNAL_SERVER_ERROR,

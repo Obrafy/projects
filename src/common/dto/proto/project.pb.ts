@@ -239,6 +239,24 @@ export interface DeactivateProjectResponse {
 }
 
 /**
+ * AddTasksToProject
+ * Request
+ */
+export interface AddTasksToProjectRequest {
+  projectId: string;
+  tasksIds: string[];
+}
+
+/** Response */
+export interface AddTasksToProjectResponseData {}
+
+export interface AddTasksToProjectResponse {
+  status: number;
+  error: string[];
+  data: AddTasksToProjectResponse | undefined;
+}
+
+/**
  * TaskCreate
  * Request
  */
@@ -342,6 +360,58 @@ export interface TaskResponseData {
   task: TaskResponse | undefined;
 }
 
+/**
+ * ActivateTask
+ * Request
+ */
+export interface ActivateTaskRequest {
+  taskId: string;
+}
+
+/** Response */
+export interface ActivateTaskResponseData {}
+
+export interface ActivateTaskResponse {
+  status: number;
+  error: string[];
+  data: ActivateTaskResponseData | undefined;
+}
+
+/**
+ * DeactivateTask
+ * Request
+ */
+export interface DeactivateTaskRequest {
+  taskId: string;
+}
+
+/** Response */
+export interface DeactivateTaskResponseData {}
+
+export interface DeactivateTaskResponse {
+  status: number;
+  error: string[];
+  data: DeactivateTaskResponseData | undefined;
+}
+
+/**
+ * AddSkillToTask
+ * Request
+ */
+export interface AddSkillToTaskRequest {
+  taskId: string;
+  skillsIds: string[];
+}
+
+/** Response */
+export interface AddSkillToTaskResponseData {}
+
+export interface AddSkillToTaskResponse {
+  status: number;
+  error: string[];
+  data: AddSkillToTaskResponseData | undefined;
+}
+
 export const PROJECT_PACKAGE_NAME = 'project';
 
 export interface ProjectServiceClient {
@@ -355,86 +425,57 @@ export interface ProjectServiceClient {
 
   remove(request: ProjectRemoveRequest): Observable<ProjectRemoveResponse>;
 
-  findAllTaskOfProject(
-    request: FindAllTaskOfProjectRequest,
-  ): Observable<FindAllTaskOfProjectResponse>;
+  findAllTaskOfProject(request: FindAllTaskOfProjectRequest): Observable<FindAllTaskOfProjectResponse>;
 
-  fieldsOverrides(
-    request: FieldsOverridesRequest,
-  ): Observable<FieldsOverridesResponse>;
+  fieldsOverrides(request: FieldsOverridesRequest): Observable<FieldsOverridesResponse>;
 
-  activateProject(
-    request: ActivateProjectRequest,
-  ): Observable<ActivateProjectResponse>;
+  activateProject(request: ActivateProjectRequest): Observable<ActivateProjectResponse>;
 
-  deactivateProject(
-    request: DeactivateProjectRequest,
-  ): Observable<DeactivateProjectResponse>;
+  deactivateProject(request: DeactivateProjectRequest): Observable<DeactivateProjectResponse>;
+
+  addTasksToProject(request: AddTasksToProjectRequest): Observable<AddTasksToProjectResponse>;
 }
 
 export interface ProjectServiceController {
   create(
     request: ProjectCreateRequest,
-  ):
-    | Promise<ProjectCreateResponse>
-    | Observable<ProjectCreateResponse>
-    | ProjectCreateResponse;
+  ): Promise<ProjectCreateResponse> | Observable<ProjectCreateResponse> | ProjectCreateResponse;
 
   findAll(
     request: ProjectFindAllRequest,
-  ):
-    | Promise<ProjectFindAllResponse>
-    | Observable<ProjectFindAllResponse>
-    | ProjectFindAllResponse;
+  ): Promise<ProjectFindAllResponse> | Observable<ProjectFindAllResponse> | ProjectFindAllResponse;
 
   findOne(
     request: ProjectFindOneRequest,
-  ):
-    | Promise<ProjectFindOneResponse>
-    | Observable<ProjectFindOneResponse>
-    | ProjectFindOneResponse;
+  ): Promise<ProjectFindOneResponse> | Observable<ProjectFindOneResponse> | ProjectFindOneResponse;
 
   update(
     request: ProjectUpdateRequest,
-  ):
-    | Promise<ProjectUpdateResponse>
-    | Observable<ProjectUpdateResponse>
-    | ProjectUpdateResponse;
+  ): Promise<ProjectUpdateResponse> | Observable<ProjectUpdateResponse> | ProjectUpdateResponse;
 
   remove(
     request: ProjectRemoveRequest,
-  ):
-    | Promise<ProjectRemoveResponse>
-    | Observable<ProjectRemoveResponse>
-    | ProjectRemoveResponse;
+  ): Promise<ProjectRemoveResponse> | Observable<ProjectRemoveResponse> | ProjectRemoveResponse;
 
   findAllTaskOfProject(
     request: FindAllTaskOfProjectRequest,
-  ):
-    | Promise<FindAllTaskOfProjectResponse>
-    | Observable<FindAllTaskOfProjectResponse>
-    | FindAllTaskOfProjectResponse;
+  ): Promise<FindAllTaskOfProjectResponse> | Observable<FindAllTaskOfProjectResponse> | FindAllTaskOfProjectResponse;
 
   fieldsOverrides(
     request: FieldsOverridesRequest,
-  ):
-    | Promise<FieldsOverridesResponse>
-    | Observable<FieldsOverridesResponse>
-    | FieldsOverridesResponse;
+  ): Promise<FieldsOverridesResponse> | Observable<FieldsOverridesResponse> | FieldsOverridesResponse;
 
   activateProject(
     request: ActivateProjectRequest,
-  ):
-    | Promise<ActivateProjectResponse>
-    | Observable<ActivateProjectResponse>
-    | ActivateProjectResponse;
+  ): Promise<ActivateProjectResponse> | Observable<ActivateProjectResponse> | ActivateProjectResponse;
 
   deactivateProject(
     request: DeactivateProjectRequest,
-  ):
-    | Promise<DeactivateProjectResponse>
-    | Observable<DeactivateProjectResponse>
-    | DeactivateProjectResponse;
+  ): Promise<DeactivateProjectResponse> | Observable<DeactivateProjectResponse> | DeactivateProjectResponse;
+
+  addTasksToProject(
+    request: AddTasksToProjectRequest,
+  ): Promise<AddTasksToProjectResponse> | Observable<AddTasksToProjectResponse> | AddTasksToProjectResponse;
 }
 
 export function ProjectServiceControllerMethods() {
@@ -449,29 +490,16 @@ export function ProjectServiceControllerMethods() {
       'fieldsOverrides',
       'activateProject',
       'deactivateProject',
+      'addTasksToProject',
     ];
     for (const method of grpcMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(
-        constructor.prototype,
-        method,
-      );
-      GrpcMethod('ProjectService', method)(
-        constructor.prototype[method],
-        method,
-        descriptor,
-      );
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      GrpcMethod('ProjectService', method)(constructor.prototype[method], method, descriptor);
     }
     const grpcStreamMethods: string[] = [];
     for (const method of grpcStreamMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(
-        constructor.prototype,
-        method,
-      );
-      GrpcStreamMethod('ProjectService', method)(
-        constructor.prototype[method],
-        method,
-        descriptor,
-      );
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      GrpcStreamMethod('ProjectService', method)(constructor.prototype[method], method, descriptor);
     }
   };
 }
@@ -488,43 +516,40 @@ export interface TaskServiceClient {
   update(request: TaskUpdateRequest): Observable<TaskUpdateResponse>;
 
   remove(request: TaskRemoveRequest): Observable<TaskRemoveResponse>;
+
+  activateTask(request: ActivateTaskRequest): Observable<ActivateTaskResponse>;
+
+  deactivateTask(request: DeactivateTaskRequest): Observable<DeactivateTaskResponse>;
+
+  addSkillToTask(request: AddSkillToTaskRequest): Observable<AddSkillToTaskResponse>;
 }
 
 export interface TaskServiceController {
-  create(
-    request: TaskCreateRequest,
-  ):
-    | Promise<TaskCreateResponse>
-    | Observable<TaskCreateResponse>
-    | TaskCreateResponse;
+  create(request: TaskCreateRequest): Promise<TaskCreateResponse> | Observable<TaskCreateResponse> | TaskCreateResponse;
 
   findAll(
     request: TaskFindAllRequest,
-  ):
-    | Promise<TaskFindAllResponse>
-    | Observable<TaskFindAllResponse>
-    | TaskFindAllResponse;
+  ): Promise<TaskFindAllResponse> | Observable<TaskFindAllResponse> | TaskFindAllResponse;
 
   findOne(
     request: TaskFindOneRequest,
-  ):
-    | Promise<TaskFindOneResponse>
-    | Observable<TaskFindOneResponse>
-    | TaskFindOneResponse;
+  ): Promise<TaskFindOneResponse> | Observable<TaskFindOneResponse> | TaskFindOneResponse;
 
-  update(
-    request: TaskUpdateRequest,
-  ):
-    | Promise<TaskUpdateResponse>
-    | Observable<TaskUpdateResponse>
-    | TaskUpdateResponse;
+  update(request: TaskUpdateRequest): Promise<TaskUpdateResponse> | Observable<TaskUpdateResponse> | TaskUpdateResponse;
 
-  remove(
-    request: TaskRemoveRequest,
-  ):
-    | Promise<TaskRemoveResponse>
-    | Observable<TaskRemoveResponse>
-    | TaskRemoveResponse;
+  remove(request: TaskRemoveRequest): Promise<TaskRemoveResponse> | Observable<TaskRemoveResponse> | TaskRemoveResponse;
+
+  activateTask(
+    request: ActivateTaskRequest,
+  ): Promise<ActivateTaskResponse> | Observable<ActivateTaskResponse> | ActivateTaskResponse;
+
+  deactivateTask(
+    request: DeactivateTaskRequest,
+  ): Promise<DeactivateTaskResponse> | Observable<DeactivateTaskResponse> | DeactivateTaskResponse;
+
+  addSkillToTask(
+    request: AddSkillToTaskRequest,
+  ): Promise<AddSkillToTaskResponse> | Observable<AddSkillToTaskResponse> | AddSkillToTaskResponse;
 }
 
 export function TaskServiceControllerMethods() {
@@ -535,29 +560,18 @@ export function TaskServiceControllerMethods() {
       'findOne',
       'update',
       'remove',
+      'activateTask',
+      'deactivateTask',
+      'addSkillToTask',
     ];
     for (const method of grpcMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(
-        constructor.prototype,
-        method,
-      );
-      GrpcMethod('TaskService', method)(
-        constructor.prototype[method],
-        method,
-        descriptor,
-      );
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      GrpcMethod('TaskService', method)(constructor.prototype[method], method, descriptor);
     }
     const grpcStreamMethods: string[] = [];
     for (const method of grpcStreamMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(
-        constructor.prototype,
-        method,
-      );
-      GrpcStreamMethod('TaskService', method)(
-        constructor.prototype[method],
-        method,
-        descriptor,
-      );
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      GrpcStreamMethod('TaskService', method)(constructor.prototype[method], method, descriptor);
     }
   };
 }
