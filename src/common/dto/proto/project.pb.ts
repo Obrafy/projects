@@ -394,13 +394,15 @@ export interface DeactivateTaskResponse {
   data: DeactivateTaskResponseData | undefined;
 }
 
-/**
- * AddSkillToTask
- * Request
- */
+export interface SkillRequest {
+  id: string;
+  requiredSkillLevel: number;
+}
+
+/** Request */
 export interface AddSkillToTaskRequest {
   taskId: string;
-  skillsIds: string[];
+  skills: SkillRequest[];
 }
 
 /** Response */
