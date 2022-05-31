@@ -23,6 +23,7 @@ import {
   DeactivateTaskRequest,
   ActivateTaskRequest,
   AddSkillToTaskRequest,
+  SkillRequest,
 } from 'src/common/dto/proto/project.pb';
 
 enum LevelType {
@@ -126,10 +127,19 @@ export class TaskStatusRequestDto implements ActivateTaskRequest, DeactivateTask
   taskId: string;
 }
 
+class SkillRequestDto implements SkillRequest {
+  @IsMongoId()
+  id: string;
+
+  @IsNumber()
+  requiredSkillLevel: number;
+}
+
 export class AddSkillToTaskRequestDto implements AddSkillToTaskRequest {
   @IsMongoId()
   taskId: string;
 
-  @IsMongoId({ each: true })
-  skillsIds: string[];
+  @Type(() => SkillRequestDto)
+  @ValidateNested()
+  skills: SkillRequestDto[];
 }
