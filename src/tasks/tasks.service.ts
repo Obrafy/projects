@@ -110,6 +110,7 @@ export class TasksService {
 
   public async addSkillToTask(payload: DTO.AddSkillToTaskRequestDto): Promise<void> {
     this.logger.log(this.addSkillToTask.name, payload);
+    const { skills } = payload;
 
     const task = await this._getTaskById(payload.taskId);
 
@@ -117,16 +118,18 @@ export class TasksService {
       throw new EXCEPTIONS.NotFoundException(TASK_ERROR_MESSAGES_KEYS.TASK_NOT_FOUND);
     }
 
-    const { skillsIds } = payload;
+    const hasSkillAlreadyAssigned = skills.filter((skill) => {
+      const { id } = skill;
 
-    const hasSkillAlreadyAssigned = task.possibleSkills.filter((skill) => skillsIds.indexOf(skill.skillId) === -1);
+      return task.possibleSkills.findIndex((skill) => skill.skillId === id) >= 0;
+    });
 
     if (hasSkillAlreadyAssigned.length > 0) {
       throw new EXCEPTIONS.NotFoundException(TASK_ERROR_MESSAGES_KEYS.TASK_SKILL_ALREADY_ASSIGNED);
     }
 
-    const possibleSkills = skillsIds.map((skillId) => {
-      return new PossibleSkills(skillId, 0);
+    const possibleSkills = skills.map((skill) => {
+      return new PossibleSkills(skill.id, skill.requiredSkillLevel);
     });
 
     task.possibleSkills = [...task.possibleSkills, ...possibleSkills];
