@@ -69,9 +69,9 @@ export class TasksController {
   }
 
   @GrpcMethod(PROTO.TASK_SERVICE_NAME, 'Update')
-  private async update({ id, data }: DTO.TaskUpdateRequestDto): Promise<PROTO.TaskUpdateResponse> {
+  private async update({ taskId, data }: DTO.TaskUpdateRequestDto): Promise<PROTO.TaskUpdateResponse> {
     const taskData = await this.tasksService.update({
-      id,
+      taskId,
       data: data as PROTO.TaskUpdateData,
     });
 
@@ -112,5 +112,11 @@ export class TasksController {
   private async addSkillToTask(payload: DTO.AddSkillToTaskRequestDto): Promise<PROTO.AddSkillToTaskResponse> {
     await this.tasksService.addSkillToTask(payload);
     return makeResponse<PROTO.AddSkillToTaskResponse>(null);
+  }
+
+  @GrpcMethod(PROTO.TASK_SERVICE_NAME, 'RemoveSkillToTask')
+  private async removeSkillToTask(payload: DTO.RemoveSkillToTaskRequestDto): Promise<PROTO.RemoveSkillToTaskResponse> {
+    await this.tasksService.removeSkillToTask(payload);
+    return makeResponse<PROTO.RemoveSkillToTaskResponse>(null);
   }
 }

@@ -24,6 +24,7 @@ import {
   ActivateTaskRequest,
   AddSkillToTaskRequest,
   SkillRequest,
+  RemoveSkillToTaskRequest,
 } from 'src/common/dto/proto/project.pb';
 
 enum LevelType {
@@ -71,16 +72,16 @@ class PossibleSkillsDto implements PossibleSkills {
   requiredSkillLevel: number;
 }
 
-export class TaskFindAllRequestDto implements TaskFindAllRequest {}
+export class TaskFindAllRequestDto implements TaskFindAllRequest { }
 
 export class TaskFindOneRequestDto implements TaskFindOneRequest {
   @IsMongoId()
-  public readonly id: string;
+  public readonly taskId: string;
 }
 
 export class TaskUpdateRequestDto implements TaskUpdateRequest {
   @IsMongoId()
-  public readonly id: string;
+  public readonly taskId: string;
 
   // @Type(() => TaskUpdateData)
   @ValidateNested()
@@ -89,7 +90,7 @@ export class TaskUpdateRequestDto implements TaskUpdateRequest {
 
 export class TaskRemoveRequestDto implements TaskRemoveRequest {
   @IsMongoId()
-  public readonly id: string;
+  public readonly taskId: string;
 }
 
 export class TaskDto {
@@ -142,4 +143,14 @@ export class AddSkillToTaskRequestDto implements AddSkillToTaskRequest {
   @Type(() => SkillRequestDto)
   @ValidateNested()
   skills: SkillRequestDto[];
+}
+
+
+export class RemoveSkillToTaskRequestDto implements RemoveSkillToTaskRequest {
+
+  @IsMongoId()
+  taskId: string;
+
+  @IsMongoId({ each: true })
+  skillIds: string[];
 }

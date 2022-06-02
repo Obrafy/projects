@@ -64,7 +64,7 @@ export class ProjectsService {
       const { address, tasks } = createProjectDto;
 
       if (tasks) {
-        await Promise.all(tasks.map((taskId) => this.tasksService.findOne({ id: taskId })));
+        await Promise.all(tasks.map((taskId) => this.tasksService.findOne({ taskId })));
       }
 
       let addressObj = await this.addressModel.findOne({ ...address });
@@ -176,7 +176,7 @@ export class ProjectsService {
 
     const projectTasks = await Promise.all(
       tasksIds.map(async (taskId) => {
-        const task = await this.tasksService.findOne({ id: taskId });
+        const task = await this.tasksService.findOne({ taskId });
         return new ProjectTasks(task, [], {});
       }),
     );

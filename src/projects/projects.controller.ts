@@ -34,15 +34,13 @@ export class ProjectsController {
 
     const result = projects.map((projectData) => {
       return {
-        project: {
-          status: projectData.status,
-          startDate: new Date(projectData.startDate).getTime(),
-          expectedFinishedDate: new Date(projectData.expectedFinishedDate).getTime(),
-          responsible: projectData.responsible,
-          address: projectData.address,
-          projectTask: [],
-          id: projectData._id,
-        },
+        status: projectData.status,
+        startDate: new Date(projectData.startDate).getTime(),
+        expectedFinishedDate: new Date(projectData.expectedFinishedDate).getTime(),
+        responsible: projectData.responsible,
+        address: projectData.address,
+        projectTask: [],
+        id: projectData._id,
       };
     });
 
