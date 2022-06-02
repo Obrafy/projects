@@ -87,28 +87,28 @@ export class ProjectsService {
     return await this._getAllProjects();
   }
 
-  public async findOne({ id }: DTO.ProjectFindOneRequestDto): Promise<ProjectDocument> {
-    this.logger.log('Find one  by id', id);
-    const project = await this._getProjectById(id);
+  public async findOne({ projectId }: DTO.ProjectFindOneRequestDto): Promise<ProjectDocument> {
+    this.logger.log('Find one  by id', projectId);
+    const project = await this._getProjectById(projectId);
 
     if (!project) throw new EXCEPTIONS.NotFoundException(PROJECT_ERROR_MESSAGES_KEYS.PROJECT_NOT_FOUND);
 
     return project;
   }
 
-  public async update({ id, data }: DTO.ProjectUpdateRequestDto): Promise<ProjectDocument> {
-    await this.projectModel.findOneAndUpdate({ _id: id }, data);
+  public async update({ projectId, data }: DTO.ProjectUpdateRequestDto): Promise<ProjectDocument> {
+    await this.projectModel.findOneAndUpdate({ _id: projectId }, data);
 
-    const project = await this._getProjectById(id);
+    const project = await this._getProjectById(projectId);
     if (!project) throw new EXCEPTIONS.NotFoundException(PROJECT_ERROR_MESSAGES_KEYS.PROJECT_NOT_FOUND);
 
     return project;
   }
 
-  public async remove({ id }: DTO.ProjectRemoveRequestDto) {
-    this.logger.log('Remove Project by ID', id);
+  public async remove({ projectId }: DTO.ProjectRemoveRequestDto) {
+    this.logger.log('Remove Project by ID', projectId);
 
-    const project = await this._getProjectById(id);
+    const project = await this._getProjectById(projectId);
     if (!project) throw new EXCEPTIONS.NotFoundException(PROJECT_ERROR_MESSAGES_KEYS.PROJECT_NOT_FOUND);
 
     project.status = Status.DELETED;
@@ -116,11 +116,11 @@ export class ProjectsService {
     await project.save();
   }
 
-  public async findAllTaskOfProject({ id }: DTO.FindAllTaskOfProjectRequestDto) {
-    this.logger.log('Find Tasks one project by id', id);
+  public async findAllTaskOfProject({ projectId }: DTO.FindAllTaskOfProjectRequestDto) {
+    this.logger.log('Find Tasks one project by id', projectId);
 
     const project = await (
-      await this.projectModel.findOne({ _id: id }, { tasks: 1 })
+      await this.projectModel.findOne({ _id: projectId }, { tasks: 1 })
     ).populate({
       path: 'tasks.task',
     });
@@ -155,14 +155,13 @@ export class ProjectsService {
 
   public async addTasksToProject(payload: DTO.AddTasksToProjectRequestDto): Promise<void> {
     this.logger.log(this.addTasksToProject.name, payload);
+    const { tasksIds } = payload;
 
     const project = await this._getProjectById(payload.projectId);
 
     if (!project) {
       throw new EXCEPTIONS.NotFoundException(PROJECT_ERROR_MESSAGES_KEYS.PROJECT_NOT_FOUND);
     }
-
-    const { tasksIds } = payload;
 
     const hasTaskAlreadyAssigned = project.tasks.filter(
       (projectTask) =>
@@ -183,6 +182,25 @@ export class ProjectsService {
     );
 
     project.tasks = [...project.tasks, ...projectTasks];
+
+    await project.save();
+  }
+
+  public async removeTasksToProject(payload: DTO.RemoveTasksToProjectRequestDto): Promise<void> {
+    this.logger.log(this.removeTasksToProject.name, payload);
+    const { tasksIds } = payload;
+
+    const project = await this._getProjectById(payload.projectId);
+
+    if (!project) {
+      throw new EXCEPTIONS.NotFoundException(PROJECT_ERROR_MESSAGES_KEYS.PROJECT_NOT_FOUND);
+    }
+
+    const tasksFiltered = project.tasks.filter((item) => {
+      return tasksIds.indexOf((item.task as TaskDocument)._id) === -1;
+    });
+
+    project.tasks = tasksFiltered;
 
     await project.save();
   }

@@ -63,7 +63,7 @@ export interface ProjectFindAllResponse {
 }
 
 export interface ProjectFindOneRequest {
-  id: string;
+  projectId: string;
 }
 
 export interface ProjectFindOneResponse {
@@ -77,7 +77,7 @@ export interface ProjectFindOneResponse {
  * Request
  */
 export interface ProjectUpdateRequest {
-  id: string;
+  projectId: string;
   data: UpdateProjectData | undefined;
 }
 
@@ -100,7 +100,7 @@ export interface UpdateProjectData {
  * Request
  */
 export interface ProjectRemoveRequest {
-  id: string;
+  projectId: string;
 }
 
 /** Response */
@@ -117,7 +117,7 @@ export interface RemoveData {}
  * Request
  */
 export interface FindAllTaskOfProjectRequest {
-  id: string;
+  projectId: string;
 }
 
 /** Response */
@@ -254,6 +254,24 @@ export interface AddTasksToProjectResponse {
   status: number;
   error: string[];
   data: AddTasksToProjectResponse | undefined;
+}
+
+/**
+ * RemoveTasksToProject
+ * RemoveTasksToProjectRequest
+ */
+export interface RemoveTasksToProjectRequest {
+  projectId: string;
+  tasksIds: string[];
+}
+
+/** RemoveTasksToProjectResponse */
+export interface RemoveTasksToProjectResponseData {}
+
+export interface RemoveTasksToProjectResponse {
+  status: number;
+  error: string[];
+  data: RemoveTasksToProjectResponseData | undefined;
 }
 
 /**
@@ -436,6 +454,8 @@ export interface ProjectServiceClient {
   deactivateProject(request: DeactivateProjectRequest): Observable<DeactivateProjectResponse>;
 
   addTasksToProject(request: AddTasksToProjectRequest): Observable<AddTasksToProjectResponse>;
+
+  removeTasksToProject(request: RemoveTasksToProjectRequest): Observable<RemoveTasksToProjectResponse>;
 }
 
 export interface ProjectServiceController {
@@ -478,6 +498,10 @@ export interface ProjectServiceController {
   addTasksToProject(
     request: AddTasksToProjectRequest,
   ): Promise<AddTasksToProjectResponse> | Observable<AddTasksToProjectResponse> | AddTasksToProjectResponse;
+
+  removeTasksToProject(
+    request: RemoveTasksToProjectRequest,
+  ): Promise<RemoveTasksToProjectResponse> | Observable<RemoveTasksToProjectResponse> | RemoveTasksToProjectResponse;
 }
 
 export function ProjectServiceControllerMethods() {
@@ -493,6 +517,7 @@ export function ProjectServiceControllerMethods() {
       'activateProject',
       'deactivateProject',
       'addTasksToProject',
+      'removeTasksToProject',
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);

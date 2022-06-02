@@ -19,7 +19,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "proto:install": "yarn i https://github.com/obrafy/proto.git",
+    "proto:install": "yarn add https://github.com/obrafy/proto.git",
     "proto:project": "protoc --plugin=node_modules/.bin/protoc-gen-ts_proto -I=./node_modules/proto/proto-files/project-service --ts_proto_out=src/common/dto/proto node_modules/proto/proto-files/project-service/project.proto --ts_proto_opt=nestJs=true --ts_proto_opt=fileSuffix=.pb",
     "proto:auth": "protoc --plugin=node_modules/.bin/protoc-gen-ts_proto -I=./node_modules/proto/proto-files/authentication-service --ts_proto_out=src/common/dto/proto ./node_modules/proto/proto-files/authentication-service/auth.proto --ts_proto_opt=nestJs=true --ts_proto_opt=fileSuffix=.pb",
     "proto:all": " yarn proto:install && yarn proto:project && yarn proto:auth"
@@ -38,7 +38,7 @@
     "class-validator": "^0.13.2",
     "joi": "^17.6.0",
     "mongoose": "^6.3.0",
-    "proto": "github:obrafy/proto",
+    "proto": "https://github.com/obrafy/proto.git",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0"

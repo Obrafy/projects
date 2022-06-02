@@ -30,7 +30,7 @@ export class ProjectFindAllRequestDto implements PROTO.ProjectFindAllRequest {}
 
 export class ProjectFindOneRequestDto implements PROTO.ProjectFindOneRequest {
   @IsString()
-  public readonly id: string;
+  public readonly projectId: string;
 }
 
 export class UpdateProjectDataDto implements PROTO.UpdateProjectData {
@@ -44,7 +44,7 @@ export class UpdateProjectDataDto implements PROTO.UpdateProjectData {
 
 export class ProjectUpdateRequestDto implements PROTO.ProjectUpdateRequest {
   @IsString()
-  public readonly id: string;
+  public readonly projectId: string;
 
   @Type(() => UpdateProjectDataDto)
   @ValidateNested()
@@ -53,12 +53,12 @@ export class ProjectUpdateRequestDto implements PROTO.ProjectUpdateRequest {
 
 export class ProjectRemoveRequestDto implements PROTO.ProjectRemoveRequest {
   @IsString()
-  public readonly id: string;
+  public readonly projectId: string;
 }
 
 export class FindAllTaskOfProjectRequestDto implements PROTO.FindAllTaskOfProjectRequest {
   @IsString()
-  public readonly id: string;
+  public readonly projectId: string;
 }
 
 enum LevelType {
@@ -117,6 +117,14 @@ export class ProjectStatusRequestDto implements PROTO.ActivateProjectRequest, PR
 }
 
 export class AddTasksToProjectRequestDto implements PROTO.AddTasksToProjectRequest {
+  @IsMongoId()
+  projectId: string;
+
+  @IsMongoId({ each: true })
+  tasksIds: string[];
+}
+
+export class RemoveTasksToProjectRequestDto implements PROTO.RemoveTasksToProjectRequest {
   @IsMongoId()
   projectId: string;
 

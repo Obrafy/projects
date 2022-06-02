@@ -79,9 +79,9 @@ export class ProjectsController {
   }
 
   @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'Update')
-  private async update({ id, data }: DTO.ProjectUpdateRequestDto): Promise<PROTO.ProjectUpdateResponse> {
+  private async update({ projectId, data }: DTO.ProjectUpdateRequestDto): Promise<PROTO.ProjectUpdateResponse> {
     const projectData = await this.projectsService.update({
-      id,
+      projectId,
       data: data as PROTO.UpdateProjectData,
     });
 
@@ -159,5 +159,13 @@ export class ProjectsController {
   private async addTasksToProject(payload: DTO.AddTasksToProjectRequestDto): Promise<PROTO.AddTasksToProjectResponse> {
     await this.projectsService.addTasksToProject(payload);
     return makeResponse<PROTO.AddTasksToProjectResponse>(null);
+  }
+
+  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'RemoveTasksToProject')
+  private async removeTasksToProject(
+    payload: DTO.RemoveTasksToProjectRequestDto,
+  ): Promise<PROTO.RemoveTasksToProjectResponse> {
+    await this.projectsService.removeTasksToProject(payload);
+    return makeResponse<PROTO.RemoveTasksToProjectResponse>(null);
   }
 }
