@@ -1,7 +1,7 @@
 import { Model, FilterQuery } from 'mongoose';
 import { ClientGrpc } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { PossibleSkills, Task, TaskDocument } from './entities/task.entity';
 import * as DTO from '../tasks/dto/task.dto';
 import { SkillManagementServiceClient, SKILL_MANAGEMENT_SERVICE_NAME } from 'src/common/dto/proto/auth.pb';
@@ -133,18 +133,14 @@ export class TasksService {
     const possibleSkills = await Promise.all(
       skills.map(async (skill) => {
         
-        await firstValueFrom(this.skillManagementServiceClient.findSkillById({ skillId: skill.id })) 
-        return new PossibleSkills(skill.id, skill.requiredSkillLevel);
+       const { error, status} = await firstValueFrom(this.skillManagementServiceClient.findSkillById({ skillId: skill.id })) 
+       if(error && error.length > 0) throw new EXCEPTIONS.HttpException(error, status);
+       return new PossibleSkills(skill.id, skill.requiredSkillLevel);
       })
     )
 
-    
-    const invalidResults =  possibleSkills.filter(result => (result instanceof Error))
-    if(invalidResults.length >= 0 )
-      throw new EXCEPTIONS.NotFoundException(TASK_ERROR_MESSAGES_KEYS.TASK_SKILL_ALREADY_ASSIGNED);
-    
     task.possibleSkills = [...task.possibleSkills, ...possibleSkills];
-
+    
     await task.save();
   }
 
