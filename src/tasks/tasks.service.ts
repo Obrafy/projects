@@ -1,13 +1,15 @@
 import { Model, FilterQuery } from 'mongoose';
 import { ClientGrpc } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { PossibleSkills, Task, TaskDocument } from './entities/task.entity';
 import * as DTO from '../tasks/dto/task.dto';
 import { SkillManagementServiceClient, SKILL_MANAGEMENT_SERVICE_NAME } from 'src/common/dto/proto/auth.pb';
 import { TASK_ERROR_MESSAGES_KEYS } from 'src/common/error-messages/error-messagens.interface';
 import * as EXCEPTIONS from '@nestjs/common/exceptions';
 import { Status } from 'src/common/dto/status.enum';
+import { firstValueFrom } from 'rxjs';
+import { Console } from 'console';
 
 @Injectable()
 export class TasksService {
@@ -15,7 +17,7 @@ export class TasksService {
     @InjectModel(Task.name) private readonly taskModel: Model<TaskDocument>,
     @Inject(SKILL_MANAGEMENT_SERVICE_NAME)
     private readonly grpcClient: ClientGrpc,
-  ) {}
+  ) { }
 
   // Private Methods
 
@@ -65,29 +67,29 @@ export class TasksService {
     return await this._getAllTasks();
   }
 
-  public async findOne({ id }: DTO.TaskFindOneRequestDto): Promise<TaskDocument> {
-    this.logger.log('Find task by id', id);
+  public async findOne({ taskId }: DTO.TaskFindOneRequestDto): Promise<TaskDocument> {
+    this.logger.log('Find task by id', taskId);
 
-    const task = await this._getTaskById(id);
+    const task = await this._getTaskById(taskId);
 
     if (!task) throw new EXCEPTIONS.NotFoundException(TASK_ERROR_MESSAGES_KEYS.TASK_NOT_FOUND);
 
     return task;
   }
 
-  public async update({ id, data }: DTO.TaskUpdateRequestDto): Promise<TaskDocument> {
-    await this.taskModel.findOneAndUpdate({ _id: id }, data).exec();
+  public async update({ taskId, data }: DTO.TaskUpdateRequestDto): Promise<TaskDocument> {
+    await this.taskModel.findOneAndUpdate({ _id: taskId }, data).exec();
 
-    const task = await this._getTaskById(id);
+    const task = await this._getTaskById(taskId);
     if (!task) throw new EXCEPTIONS.NotFoundException(TASK_ERROR_MESSAGES_KEYS.TASK_NOT_FOUND);
 
     return task;
   }
 
-  public async remove({ id }: DTO.TaskRemoveRequestDto) {
-    this.logger.log('Remove Task by ID', id);
+  public async remove({ taskId }: DTO.TaskRemoveRequestDto) {
+    this.logger.log('Remove Task by ID', taskId);
 
-    const task = await this._getTaskById(id);
+    const task = await this._getTaskById(taskId);
     if (!task) throw new EXCEPTIONS.NotFoundException(TASK_ERROR_MESSAGES_KEYS.TASK_NOT_FOUND);
 
     task.status = Status.DELETED;
@@ -128,12 +130,40 @@ export class TasksService {
       throw new EXCEPTIONS.NotFoundException(TASK_ERROR_MESSAGES_KEYS.TASK_SKILL_ALREADY_ASSIGNED);
     }
 
-    const possibleSkills = skills.map((skill) => {
-      return new PossibleSkills(skill.id, skill.requiredSkillLevel);
-    });
+    const possibleSkills = await Promise.all(
+      skills.map(async (skill) => {
+        
+       const { error, status} = await firstValueFrom(this.skillManagementServiceClient.findSkillById({ skillId: skill.id })) 
+       if(error && error.length > 0) throw new EXCEPTIONS.HttpException(error, status);
+       return new PossibleSkills(skill.id, skill.requiredSkillLevel);
+      })
+    )
 
     task.possibleSkills = [...task.possibleSkills, ...possibleSkills];
+    
+    await task.save();
+  }
+
+  public async removeSkillToTask(payload: DTO.RemoveSkillToTaskRequestDto): Promise<void> {
+    this.logger.log(this.removeSkillToTask.name, payload);
+    const { skillIds } = payload;
+
+    const task = await this._getTaskById(payload.taskId);
+
+    if (!task) {
+      throw new EXCEPTIONS.NotFoundException(TASK_ERROR_MESSAGES_KEYS.TASK_NOT_FOUND);
+    }
+
+    const skillFiltered = task.possibleSkills.filter((skill) => {
+      return skillIds.indexOf(skill.skillId) === -1;
+    });
+
+    task.possibleSkills = skillFiltered;
 
     await task.save();
   }
+
+
+
+
 }

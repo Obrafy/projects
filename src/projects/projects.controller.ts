@@ -34,15 +34,13 @@ export class ProjectsController {
 
     const result = projects.map((projectData) => {
       return {
-        project: {
-          status: projectData.status,
-          startDate: new Date(projectData.startDate).getTime(),
-          expectedFinishedDate: new Date(projectData.expectedFinishedDate).getTime(),
-          responsible: projectData.responsible,
-          address: projectData.address,
-          projectTask: [],
-          id: projectData._id,
-        },
+        status: projectData.status,
+        startDate: new Date(projectData.startDate).getTime(),
+        expectedFinishedDate: new Date(projectData.expectedFinishedDate).getTime(),
+        responsible: projectData.responsible,
+        address: projectData.address,
+        projectTask: [],
+        id: projectData._id,
       };
     });
 
@@ -168,4 +166,23 @@ export class ProjectsController {
     await this.projectsService.removeTasksToProject(payload);
     return makeResponse<PROTO.RemoveTasksToProjectResponse>(null);
   }
+
+  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'AddLaborersToProject')
+  private async AddLaborersToProject(
+    payload: DTO.AddLaborersToProjectRequestDto,
+  ): Promise<PROTO.AddLaborersToProjectResponse> {
+    await this.projectsService.addLaborersToProject(payload);
+    return makeResponse<PROTO.AddLaborersToProjectResponse>(null);
+  }
+
+  @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'RemoveLaborersToProject')
+  private async RemoveLaborersToProject(
+    payload: DTO.RemoveLaborersToProjectRequestDto,
+  ): Promise<PROTO.RemoveLaborersToProjectResponse> {
+    await this.projectsService.removeLaborersToProject(payload);
+    return makeResponse<PROTO.RemoveLaborersToProjectResponse>(null);
+  }
+
 }
+
+

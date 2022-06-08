@@ -15,6 +15,7 @@ const errorMessagesEnUs: ErrorMessages = {
     TASK_ALREADY_EXISTS: 'Task id already exists',
     TASK_NOT_ACTIVE: 'Task has been found but is not active',
     TASK_SKILL_ALREADY_ASSIGNED: 'Add skill in task that is already assigned',
+    TASK_NOT_FOUND_IN_PROJECT: 'Task was not found in project',
   },
 };
 
