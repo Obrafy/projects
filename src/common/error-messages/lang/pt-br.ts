@@ -15,6 +15,7 @@ const errorMessagesPtBr: ErrorMessages = {
     TASK_ALREADY_EXISTS: 'Tarefa id já existe',
     TASK_NOT_ACTIVE: 'Tarefa foi encontrada porém não está ativa',
     TASK_SKILL_ALREADY_ASSIGNED: 'Adicionando habilidade que já existe na tarefa',
+    TASK_NOT_FOUND_IN_PROJECT: 'Tarefa não foi encontrada no projeto',
   },
 };
 
