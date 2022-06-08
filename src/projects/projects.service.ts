@@ -7,11 +7,12 @@ import { Address, AddressDocument } from './entities/address.entity';
 import { TasksService } from 'src/tasks/tasks.service';
 import { UserManagementServiceClient, USER_MANAGEMENT_SERVICE_NAME } from 'src/common/dto/proto/auth.pb';
 import * as DTO from '../projects/dto/project.dto';
-import { PROJECT_ERROR_MESSAGES_KEYS } from 'src/common/error-messages/error-messagens.interface';
+import { PROJECT_ERROR_MESSAGES_KEYS, TASK_ERROR_MESSAGES_KEYS } from 'src/common/error-messages/error-messagens.interface';
 import { Status } from 'src/common/dto/status.enum';
 import * as EXCEPTIONS from '@nestjs/common/exceptions';
-import { ProjectTasks } from './entities/projectTasks.entity';
+import { ProjectTasks, ProjectTasksDocument } from './entities/projectTasks.entity';
 import { TaskDocument } from 'src/tasks/entities/task.entity';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class ProjectsService {
@@ -26,7 +27,7 @@ export class ProjectsService {
 
     @Inject(USER_MANAGEMENT_SERVICE_NAME)
     private readonly grpcClient: ClientGrpc,
-  ) {}
+  ) { }
 
   // Private Methods
 
@@ -41,6 +42,7 @@ export class ProjectsService {
       status: { $ne: Status.DELETED },
     });
   }
+
 
   /**
    * Get all projects
@@ -204,4 +206,61 @@ export class ProjectsService {
 
     await project.save();
   }
+
+  public async addLaborersToProject(payload: DTO.AddLaborersToProjectRequestDto): Promise<void> {
+    this.logger.log(this.addLaborersToProject.name, payload);
+    const { projectId, laborers, taskId } = payload;
+
+    const project = await this._getProjectById(projectId);
+
+    if (!project) {
+      throw new EXCEPTIONS.NotFoundException(PROJECT_ERROR_MESSAGES_KEYS.PROJECT_NOT_FOUND);
+    }
+
+    const projectTaskIndex = project.tasks.findIndex(projectTask => {
+      return (projectTask.task as TaskDocument)._id.toString() === taskId
+    })
+
+    if (projectTaskIndex === -1) throw new EXCEPTIONS.NotFoundException(TASK_ERROR_MESSAGES_KEYS.TASK_NOT_FOUND_IN_PROJECT);
+
+    const validLaborers = await Promise.all(
+      laborers.map(async (userId) => {
+        const { error, status } = await firstValueFrom(this.userManagementServiceClient.findUserById({ userId }))
+        if (error && error.length > 0) throw new EXCEPTIONS.HttpException(error, status);
+        return userId
+      })
+    )
+
+    project.tasks[projectTaskIndex].laborers = validLaborers
+    project.markModified('tasks')
+    await project.save();
+  }
+
+
+  public async removeLaborersToProject(payload: DTO.RemoveLaborersToProjectRequestDto): Promise<void> {
+    this.logger.log(this.removeLaborersToProject.name, payload);
+    const { projectId, laborers, taskId } = payload;
+
+    const project = await this._getProjectById(projectId);
+    
+    if (!project) {
+      throw new EXCEPTIONS.NotFoundException(PROJECT_ERROR_MESSAGES_KEYS.PROJECT_NOT_FOUND);
+    }
+
+    const projectTaskIndex = project.tasks.findIndex(projectTask => {
+      return (projectTask.task as TaskDocument)._id.toString() === taskId
+    })
+
+    if (projectTaskIndex === -1) throw new EXCEPTIONS.NotFoundException(TASK_ERROR_MESSAGES_KEYS.TASK_NOT_FOUND_IN_PROJECT);
+
+    const laborersFiltered = project.tasks[projectTaskIndex].laborers.filter((userId) => {
+      return laborers.indexOf(userId) === -1;
+    });
+
+    
+    project.tasks[projectTaskIndex].laborers = laborersFiltered
+    project.markModified('tasks')
+    await project.save();
+  }
+
 }

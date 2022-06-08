@@ -453,6 +453,44 @@ export interface RemoveSkillToTaskResponse {
   data: RemoveSkillToTaskResponseData | undefined;
 }
 
+/**
+ * AddLaborersToProject
+ * AddLaborersToProjectRequest
+ */
+export interface AddLaborersToProjectRequest {
+  projectId: string;
+  taskId: string;
+  laborers: string[];
+}
+
+export interface AddLaborersToProjectResponseData {}
+
+/** AddLaborersToProjectResponse */
+export interface AddLaborersToProjectResponse {
+  status: number;
+  error: string[];
+  data: AddLaborersToProjectResponseData | undefined;
+}
+
+/**
+ * RemoveLaborersToProject
+ * RemoveLaborersToProjectRequest
+ */
+export interface RemoveLaborersToProjectRequest {
+  projectId: string;
+  taskId: string;
+  laborers: string[];
+}
+
+/** RemoveLaborersToProjectResponse */
+export interface RemoveLaborersToProjectResponseData {}
+
+export interface RemoveLaborersToProjectResponse {
+  status: number;
+  error: string[];
+  data: RemoveLaborersToProjectResponseData | undefined;
+}
+
 export const PROJECT_PACKAGE_NAME = 'project';
 
 export interface ProjectServiceClient {
@@ -477,6 +515,10 @@ export interface ProjectServiceClient {
   addTasksToProject(request: AddTasksToProjectRequest): Observable<AddTasksToProjectResponse>;
 
   removeTasksToProject(request: RemoveTasksToProjectRequest): Observable<RemoveTasksToProjectResponse>;
+
+  addLaborersToProject(request: AddLaborersToProjectRequest): Observable<AddLaborersToProjectResponse>;
+
+  removeLaborersToProject(request: RemoveLaborersToProjectRequest): Observable<RemoveLaborersToProjectResponse>;
 }
 
 export interface ProjectServiceController {
@@ -523,6 +565,17 @@ export interface ProjectServiceController {
   removeTasksToProject(
     request: RemoveTasksToProjectRequest,
   ): Promise<RemoveTasksToProjectResponse> | Observable<RemoveTasksToProjectResponse> | RemoveTasksToProjectResponse;
+
+  addLaborersToProject(
+    request: AddLaborersToProjectRequest,
+  ): Promise<AddLaborersToProjectResponse> | Observable<AddLaborersToProjectResponse> | AddLaborersToProjectResponse;
+
+  removeLaborersToProject(
+    request: RemoveLaborersToProjectRequest,
+  ):
+    | Promise<RemoveLaborersToProjectResponse>
+    | Observable<RemoveLaborersToProjectResponse>
+    | RemoveLaborersToProjectResponse;
 }
 
 export function ProjectServiceControllerMethods() {
@@ -539,6 +592,8 @@ export function ProjectServiceControllerMethods() {
       'deactivateProject',
       'addTasksToProject',
       'removeTasksToProject',
+      'addLaborersToProject',
+      'removeLaborersToProject',
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);

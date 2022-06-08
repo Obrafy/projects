@@ -131,3 +131,26 @@ export class RemoveTasksToProjectRequestDto implements PROTO.RemoveTasksToProjec
   @IsMongoId({ each: true })
   tasksIds: string[];
 }
+
+
+export class AddLaborersToProjectRequestDto implements PROTO.AddLaborersToProjectRequest {
+  @IsMongoId()
+  projectId: string;
+
+  @IsMongoId()
+  taskId: string;
+
+  @IsMongoId({ each: true })
+  laborers: string[];
+}
+
+export class RemoveLaborersToProjectRequestDto implements PROTO.RemoveLaborersToProjectRequest {
+  @IsMongoId()
+  projectId: string;
+
+  @IsMongoId()
+  taskId: string;
+
+  @IsMongoId({ each: true })
+  laborers: string[];
+}
