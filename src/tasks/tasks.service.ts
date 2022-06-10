@@ -17,7 +17,7 @@ export class TasksService {
     @InjectModel(Task.name) private readonly taskModel: Model<TaskDocument>,
     @Inject(SKILL_MANAGEMENT_SERVICE_NAME)
     private readonly grpcClient: ClientGrpc,
-  ) { }
+  ) {}
 
   // Private Methods
 
@@ -132,15 +132,16 @@ export class TasksService {
 
     const possibleSkills = await Promise.all(
       skills.map(async (skill) => {
-        
-       const { error, status} = await firstValueFrom(this.skillManagementServiceClient.findSkillById({ skillId: skill.id })) 
-       if(error && error.length > 0) throw new EXCEPTIONS.HttpException(error, status);
-       return new PossibleSkills(skill.id, skill.requiredSkillLevel);
-      })
-    )
+        const { error, status } = await firstValueFrom(
+          this.skillManagementServiceClient.findSkillById({ skillId: skill.id }),
+        );
+        if (error && error.length > 0) throw new EXCEPTIONS.HttpException(error, status);
+        return new PossibleSkills(skill.id, skill.requiredSkillLevel);
+      }),
+    );
 
     task.possibleSkills = [...task.possibleSkills, ...possibleSkills];
-    
+
     await task.save();
   }
 
@@ -162,8 +163,4 @@ export class TasksService {
 
     await task.save();
   }
-
-
-
-
 }

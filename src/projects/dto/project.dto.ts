@@ -25,7 +25,7 @@ export class ProjectCreateRequestDto implements PartialBy<PROTO.ProjectCreateReq
   tasks?: string[];
 }
 
-export class ProjectFindAllRequestDto implements PROTO.ProjectFindAllRequest { }
+export class ProjectFindAllRequestDto implements PROTO.ProjectFindAllRequest {}
 
 export class ProjectFindOneRequestDto implements PROTO.ProjectFindOneRequest {
   @IsString()
@@ -115,12 +115,23 @@ export class ProjectStatusRequestDto implements PROTO.ActivateProjectRequest, PR
   projectId: string;
 }
 
+class ProjectTaskRequestDataDto implements PROTO.ProjectTaskRequestData {
+  @IsMongoId()
+  tasksIds: string;
+
+  @IsNumber()
+  durationInWorkDays: number;
+
+  @IsNumber()
+  @IsOptional()
+  effort: number;
+}
 export class AddTasksToProjectRequestDto implements PROTO.AddTasksToProjectRequest {
   @IsMongoId()
   projectId: string;
 
-  @IsMongoId({ each: true })
-  tasksIds: string[];
+  @ValidateNested({ each: true })
+  tasks: ProjectTaskRequestDataDto[];
 }
 
 export class RemoveTasksToProjectRequestDto implements PROTO.RemoveTasksToProjectRequest {
@@ -130,7 +141,6 @@ export class RemoveTasksToProjectRequestDto implements PROTO.RemoveTasksToProjec
   @IsMongoId({ each: true })
   tasksIds: string[];
 }
-
 
 export class AddLaborersToProjectRequestDto implements PROTO.AddLaborersToProjectRequest {
   @IsMongoId()

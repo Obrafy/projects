@@ -51,9 +51,6 @@ export class TaskCreateRequestDto implements TaskCreateRequest {
   @TransformEnum(UnityType, ProtoUnitType)
   unity: UnityType;
 
-  @IsNumber()
-  effort: number;
-
   @Type(() => PossibleSkillsDto)
   @ValidateNested()
   possibleSkills: PossibleSkillsDto[];

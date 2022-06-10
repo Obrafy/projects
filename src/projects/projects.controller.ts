@@ -18,8 +18,8 @@ export class ProjectsController {
     return makeResponse<PROTO.ProjectCreateResponse>({
       project: {
         status: projectData.status,
-        startDate: new Date(projectData.startDate).getTime(),
-        expectedFinishedDate: new Date(projectData.expectedFinishedDate).getTime(),
+        startDate: projectData.startDate.getTime(),
+        expectedFinishedDate: projectData.expectedFinishedDate.getTime(),
         responsible: projectData.responsible,
         address: projectData.address,
         projectTask: [],
@@ -35,11 +35,14 @@ export class ProjectsController {
     const result = projects.map((projectData) => {
       return {
         status: projectData.status,
-        startDate: new Date(projectData.startDate).getTime(),
-        expectedFinishedDate: new Date(projectData.expectedFinishedDate).getTime(),
+        startDate: projectData.startDate.getTime(),
+        expectedFinishedDate: projectData.expectedFinishedDate.getTime(),
         responsible: projectData.responsible,
         address: projectData.address,
-        projectTask: [],
+        projectTask: projectData.tasks.map((t) => ({
+          ...t,
+          task: t.task._id,
+        })),
         id: projectData._id,
       };
     });
@@ -55,8 +58,8 @@ export class ProjectsController {
       project: {
         projectTask: [],
         status: projectData.status,
-        startDate: new Date(projectData.startDate).getTime(),
-        expectedFinishedDate: new Date(projectData.expectedFinishedDate).getTime(),
+        startDate: projectData.startDate.getTime(),
+        expectedFinishedDate: projectData.expectedFinishedDate.getTime(),
         responsible: projectData.responsible,
         address: projectData.address,
         id: projectData._id,
@@ -86,8 +89,8 @@ export class ProjectsController {
     return makeResponse<PROTO.ProjectUpdateResponse>({
       project: {
         status: projectData.status,
-        startDate: new Date(projectData.startDate).getTime(),
-        expectedFinishedDate: new Date(projectData.expectedFinishedDate).getTime(),
+        startDate: projectData.startDate.getTime(),
+        expectedFinishedDate: projectData.expectedFinishedDate.getTime(),
         responsible: projectData.responsible,
         address: projectData.address,
         id: projectData._id,
@@ -109,20 +112,10 @@ export class ProjectsController {
   ): Promise<PROTO.FindAllTaskOfProjectResponse> {
     const taskProjectData = await this.projectsService.findAllTaskOfProject(payload);
 
-    const result = taskProjectData.tasks.map((item) => {
-      const { task } = item;
-
-      return {
-        category: task.category,
-        activity: task.activity,
-        noiseLevel: task.noiseLevel,
-        dirtLevel: task.dirtLevel,
-        description: task.description,
-        unity: task.unity,
-        effort: task.effort,
-        possibleSkills: task.possibleSkills,
-      };
-    });
+    const result = taskProjectData.tasks.map((projectTask) => ({
+      ...projectTask,
+      task: projectTask.task._id,
+    }));
 
     return makeResponse<PROTO.FindAllTaskOfProjectResponse>(result);
   }

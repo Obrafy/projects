@@ -128,14 +128,11 @@ export interface FindAllTaskOfProjectResponse {
 }
 
 export interface FindAllTaskOfProjectData {
-  category: string;
-  activity: string;
-  noiseLevel: LevelType;
-  dirtLevel: LevelType;
-  description: string;
-  unity: UnityType;
+  task: string;
+  laborers: string[];
   effort: number;
-  possibleSkills: PossibleSkills[];
+  durationInWorkDays: number;
+  fieldsOverrides?: FieldsOverrides | undefined;
 }
 
 /**
@@ -162,7 +159,6 @@ export interface FieldsOverrides {
   dirtLevel?: LevelType | undefined;
   description?: string | undefined;
   unity?: UnityType | undefined;
-  effort?: number | undefined;
 }
 
 export interface Project {
@@ -178,6 +174,8 @@ export interface Project {
 export interface ProjectTask {
   task: string;
   laborers: string[];
+  effort: number;
+  durationInWorkDays: number;
   fieldsOverrides?: FieldsOverrides | undefined;
 }
 
@@ -244,9 +242,15 @@ export interface DeactivateProjectResponse {
  * AddTasksToProject
  * Request
  */
+export interface ProjectTaskRequestData {
+  tasksIds: string;
+  effort: number;
+  durationInWorkDays: number;
+}
+
 export interface AddTasksToProjectRequest {
   projectId: string;
-  tasksIds: string[];
+  tasks: ProjectTaskRequestData[];
 }
 
 /** Response */
@@ -255,7 +259,7 @@ export interface AddTasksToProjectResponseData {}
 export interface AddTasksToProjectResponse {
   status: number;
   error: string[];
-  data: AddTasksToProjectResponse | undefined;
+  data: AddTasksToProjectResponseData | undefined;
 }
 
 /**
@@ -287,7 +291,6 @@ export interface TaskCreateRequest {
   dirtLevel: LevelType;
   description: string;
   unity: UnityType;
-  effort: number;
   possibleSkills: PossibleSkills[];
 }
 
@@ -373,7 +376,6 @@ export interface TaskResponse {
   dirtLevel: LevelType;
   description: string;
   unity: UnityType;
-  effort: number;
   possibleSkills: PossibleSkills[];
   status: Status;
 }

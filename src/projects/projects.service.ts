@@ -7,10 +7,13 @@ import { Address, AddressDocument } from './entities/address.entity';
 import { TasksService } from 'src/tasks/tasks.service';
 import { UserManagementServiceClient, USER_MANAGEMENT_SERVICE_NAME } from 'src/common/dto/proto/auth.pb';
 import * as DTO from '../projects/dto/project.dto';
-import { PROJECT_ERROR_MESSAGES_KEYS, TASK_ERROR_MESSAGES_KEYS } from 'src/common/error-messages/error-messagens.interface';
+import {
+  PROJECT_ERROR_MESSAGES_KEYS,
+  TASK_ERROR_MESSAGES_KEYS,
+} from 'src/common/error-messages/error-messagens.interface';
 import { Status } from 'src/common/dto/status.enum';
 import * as EXCEPTIONS from '@nestjs/common/exceptions';
-import { ProjectTasks, ProjectTasksDocument } from './entities/projectTasks.entity';
+import { ProjectTasks } from './entities/projectTasks.entity';
 import { TaskDocument } from 'src/tasks/entities/task.entity';
 import { firstValueFrom } from 'rxjs';
 
@@ -27,7 +30,7 @@ export class ProjectsService {
 
     @Inject(USER_MANAGEMENT_SERVICE_NAME)
     private readonly grpcClient: ClientGrpc,
-  ) { }
+  ) {}
 
   // Private Methods
 
@@ -43,13 +46,12 @@ export class ProjectsService {
     });
   }
 
-
   /**
    * Get all projects
    * @returns An array of projects objects
    */
   private async _getAllProjects(filter: FilterQuery<ProjectDocument> = {}): Promise<ProjectDocument[]> {
-    return this.projectModel.find({ status: { $ne: Status.DELETED }, ...filter });
+    return this.projectModel.find({ status: { $ne: Status.DELETED }, ...filter }).populate(['address', 'tasks.task']);
   }
 
   public onModuleInit(): void {
@@ -74,6 +76,8 @@ export class ProjectsService {
       if (!addressObj) {
         addressObj = await this.addressModel.create(address);
       }
+
+      console.log(createProjectDto.startDate, new Date(createProjectDto.startDate));
 
       return await this.projectModel.create({
         ...createProjectDto,
@@ -121,11 +125,7 @@ export class ProjectsService {
   public async findAllTaskOfProject({ projectId }: DTO.FindAllTaskOfProjectRequestDto) {
     this.logger.log('Find Tasks one project by id', projectId);
 
-    const project = await (
-      await this.projectModel.findOne({ _id: projectId }, { tasks: 1 })
-    ).populate({
-      path: 'tasks.task',
-    });
+    const project = await this.projectModel.findOne({ _id: projectId }, { tasks: 1 });
 
     if (!project) throw new EXCEPTIONS.NotFoundException(PROJECT_ERROR_MESSAGES_KEYS.PROJECT_NOT_FOUND);
 
@@ -157,7 +157,7 @@ export class ProjectsService {
 
   public async addTasksToProject(payload: DTO.AddTasksToProjectRequestDto): Promise<void> {
     this.logger.log(this.addTasksToProject.name, payload);
-    const { tasksIds } = payload;
+    const { tasks } = payload;
 
     const project = await this._getProjectById(payload.projectId);
 
@@ -167,9 +167,13 @@ export class ProjectsService {
 
     const hasTaskAlreadyAssigned = project.tasks.filter(
       (projectTask) =>
-        tasksIds.indexOf(
-          typeof projectTask.task === 'string' ? projectTask.task : (projectTask.task as TaskDocument)._id,
-        ) === -1,
+        tasks.findIndex((t) => {
+          if (typeof projectTask.task === 'string') {
+            return projectTask.task === t.tasksIds;
+          }
+
+          return (projectTask.task as TaskDocument)._id === t.tasksIds;
+        }) === -1,
     );
 
     if (hasTaskAlreadyAssigned.length > 0) {
@@ -177,9 +181,15 @@ export class ProjectsService {
     }
 
     const projectTasks = await Promise.all(
-      tasksIds.map(async (taskId) => {
+      tasks.map(async ({ tasksIds: taskId, effort, durationInWorkDays }) => {
         const task = await this.tasksService.findOne({ taskId });
-        return new ProjectTasks(task, [], {});
+        return new ProjectTasks({
+          task,
+          durationInWorkDays: Number(durationInWorkDays),
+          effort,
+          laborers: [],
+          fieldsOverrides: {},
+        });
       }),
     );
 
@@ -217,50 +227,49 @@ export class ProjectsService {
       throw new EXCEPTIONS.NotFoundException(PROJECT_ERROR_MESSAGES_KEYS.PROJECT_NOT_FOUND);
     }
 
-    const projectTaskIndex = project.tasks.findIndex(projectTask => {
-      return (projectTask.task as TaskDocument)._id.toString() === taskId
-    })
+    const projectTaskIndex = project.tasks.findIndex((projectTask) => {
+      return (projectTask.task as TaskDocument)._id.toString() === taskId;
+    });
 
-    if (projectTaskIndex === -1) throw new EXCEPTIONS.NotFoundException(TASK_ERROR_MESSAGES_KEYS.TASK_NOT_FOUND_IN_PROJECT);
+    if (projectTaskIndex === -1)
+      throw new EXCEPTIONS.NotFoundException(TASK_ERROR_MESSAGES_KEYS.TASK_NOT_FOUND_IN_PROJECT);
 
     const validLaborers = await Promise.all(
       laborers.map(async (userId) => {
-        const { error, status } = await firstValueFrom(this.userManagementServiceClient.findUserById({ userId }))
+        const { error, status } = await firstValueFrom(this.userManagementServiceClient.findUserById({ userId }));
         if (error && error.length > 0) throw new EXCEPTIONS.HttpException(error, status);
-        return userId
-      })
-    )
+        return userId;
+      }),
+    );
 
-    project.tasks[projectTaskIndex].laborers = validLaborers
-    project.markModified('tasks')
+    project.tasks[projectTaskIndex].laborers = validLaborers;
+    project.markModified('tasks');
     await project.save();
   }
-
 
   public async removeLaborersToProject(payload: DTO.RemoveLaborersToProjectRequestDto): Promise<void> {
     this.logger.log(this.removeLaborersToProject.name, payload);
     const { projectId, laborers, taskId } = payload;
 
     const project = await this._getProjectById(projectId);
-    
+
     if (!project) {
       throw new EXCEPTIONS.NotFoundException(PROJECT_ERROR_MESSAGES_KEYS.PROJECT_NOT_FOUND);
     }
 
-    const projectTaskIndex = project.tasks.findIndex(projectTask => {
-      return (projectTask.task as TaskDocument)._id.toString() === taskId
-    })
+    const projectTaskIndex = project.tasks.findIndex((projectTask) => {
+      return (projectTask.task as TaskDocument)._id.toString() === taskId;
+    });
 
-    if (projectTaskIndex === -1) throw new EXCEPTIONS.NotFoundException(TASK_ERROR_MESSAGES_KEYS.TASK_NOT_FOUND_IN_PROJECT);
+    if (projectTaskIndex === -1)
+      throw new EXCEPTIONS.NotFoundException(TASK_ERROR_MESSAGES_KEYS.TASK_NOT_FOUND_IN_PROJECT);
 
     const laborersFiltered = project.tasks[projectTaskIndex].laborers.filter((userId) => {
       return laborers.indexOf(userId) === -1;
     });
 
-    
-    project.tasks[projectTaskIndex].laborers = laborersFiltered
-    project.markModified('tasks')
+    project.tasks[projectTaskIndex].laborers = laborersFiltered;
+    project.markModified('tasks');
     await project.save();
   }
-
 }

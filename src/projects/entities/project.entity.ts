@@ -12,13 +12,13 @@ export class Project {
   status: Status;
 
   @Prop()
-  startDate: number;
+  startDate: Date;
 
   @Prop()
-  endDate: number;
+  endDate: Date;
 
   @Prop()
-  expectedFinishedDate: number;
+  expectedFinishedDate: Date;
 
   @Prop()
   responsible: string;
