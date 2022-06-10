@@ -1,4 +1,4 @@
-import { Controller, Inject } from '@nestjs/common';
+import { Controller, HttpStatus, Inject } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import makeResponse from '../common/helpers/make-response';
 import { ProjectsService } from './projects.service';
@@ -150,7 +150,7 @@ export class ProjectsController {
   @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'AddTasksToProject')
   private async addTasksToProject(payload: DTO.AddTasksToProjectRequestDto): Promise<PROTO.AddTasksToProjectResponse> {
     await this.projectsService.addTasksToProject(payload);
-    return makeResponse<PROTO.AddTasksToProjectResponse>(null);
+    return makeResponse<PROTO.AddTasksToProjectResponse>(null, { httpStatus: HttpStatus.NO_CONTENT });
   }
 
   @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'RemoveTasksToProject')
