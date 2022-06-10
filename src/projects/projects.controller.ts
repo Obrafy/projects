@@ -22,7 +22,10 @@ export class ProjectsController {
         expectedFinishedDate: projectData.expectedFinishedDate.getTime(),
         responsible: projectData.responsible,
         address: projectData.address,
-        projectTask: [],
+        projectTask: projectData.tasks.map((t) => ({
+          ...t,
+          task: t.task._id,
+        })),
         id: projectData._id,
       },
     });
@@ -56,7 +59,10 @@ export class ProjectsController {
 
     return makeResponse<PROTO.ProjectFindOneResponse>({
       project: {
-        projectTask: [],
+        projectTask: projectData.tasks.map((t) => ({
+          ...t,
+          task: t.task._id,
+        })),
         status: projectData.status,
         startDate: projectData.startDate.getTime(),
         expectedFinishedDate: projectData.expectedFinishedDate.getTime(),
@@ -70,13 +76,13 @@ export class ProjectsController {
   @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'ActivateProject')
   private async activateProject(payload: DTO.ProjectStatusRequestDto): Promise<PROTO.ActivateProjectResponse> {
     await this.projectsService.changeProjectStatus(payload, Status.ACTIVE);
-    return makeResponse<PROTO.ActivateProjectResponse>(null);
+    return makeResponse<PROTO.ActivateProjectResponse>(null, { httpStatus: HttpStatus.NO_CONTENT });
   }
 
   @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'DeactivateProject')
   private async deactivateProject(payload: DTO.ProjectStatusRequestDto): Promise<PROTO.DeactivateProjectResponse> {
     await this.projectsService.changeProjectStatus(payload, Status.INACTIVE);
-    return makeResponse<PROTO.DeactivateProjectResponse>(null);
+    return makeResponse<PROTO.DeactivateProjectResponse>(null, { httpStatus: HttpStatus.NO_CONTENT });
   }
 
   @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'Update')
@@ -94,7 +100,10 @@ export class ProjectsController {
         responsible: projectData.responsible,
         address: projectData.address,
         id: projectData._id,
-        projectTask: [],
+        projectTask: projectData.tasks.map((t) => ({
+          ...t,
+          task: t.task._id,
+        })),
       },
     });
   }
@@ -158,7 +167,7 @@ export class ProjectsController {
     payload: DTO.RemoveTasksToProjectRequestDto,
   ): Promise<PROTO.RemoveTasksToProjectResponse> {
     await this.projectsService.removeTasksToProject(payload);
-    return makeResponse<PROTO.RemoveTasksToProjectResponse>(null);
+    return makeResponse<PROTO.RemoveTasksToProjectResponse>(null, { httpStatus: HttpStatus.NO_CONTENT });
   }
 
   @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'AddLaborersToProject')
@@ -166,7 +175,7 @@ export class ProjectsController {
     payload: DTO.AddLaborersToProjectRequestDto,
   ): Promise<PROTO.AddLaborersToProjectResponse> {
     await this.projectsService.addLaborersToProject(payload);
-    return makeResponse<PROTO.AddLaborersToProjectResponse>(null);
+    return makeResponse<PROTO.AddLaborersToProjectResponse>(null, { httpStatus: HttpStatus.NO_CONTENT });
   }
 
   @GrpcMethod(PROTO.PROJECT_SERVICE_NAME, 'RemoveLaborersToProject')
@@ -174,6 +183,6 @@ export class ProjectsController {
     payload: DTO.RemoveLaborersToProjectRequestDto,
   ): Promise<PROTO.RemoveLaborersToProjectResponse> {
     await this.projectsService.removeLaborersToProject(payload);
-    return makeResponse<PROTO.RemoveLaborersToProjectResponse>(null);
+    return makeResponse<PROTO.RemoveLaborersToProjectResponse>(null, { httpStatus: HttpStatus.NO_CONTENT });
   }
 }

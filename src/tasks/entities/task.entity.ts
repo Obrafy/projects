@@ -29,6 +29,10 @@ export class PossibleSkills {
 }
 @Schema()
 export class Task {
+  
+  @Prop({ required: true })
+  priority: number;
+
   @Prop({ required: false, default: Status.ACTIVE })
   status: Status;
 
