@@ -39,8 +39,8 @@ export interface ProjectResponseData {
  * Request
  */
 export interface ProjectCreateRequest {
-  startDate: string;
-  expectedFinishedDate: string;
+  startDate: number;
+  expectedFinishedDate: number;
   responsible: string;
   address: Address | undefined;
   tasks: string[];
@@ -90,8 +90,8 @@ export interface ProjectUpdateResponse {
 
 export interface UpdateProjectData {
   status?: Status | undefined;
-  startDate?: string | undefined;
-  expectedFinishedDate?: string | undefined;
+  startDate?: number | undefined;
+  expectedFinishedDate?: number | undefined;
   responsible?: string | undefined;
 }
 

@@ -1,17 +1,16 @@
 import { Type } from 'class-transformer';
-import { IsDateString, IsString, IsNotEmpty, ValidateNested, IsEnum, IsOptional, IsMongoId } from 'class-validator';
+import { IsString, IsNotEmpty, ValidateNested, IsEnum, IsOptional, IsMongoId, IsNumber } from 'class-validator';
 
 import { Address } from './address.dto';
 import * as PROTO from '../../common/dto/proto/project.pb';
 import { PartialBy } from 'src/common/types/global';
 
 export class ProjectCreateRequestDto implements PartialBy<PROTO.ProjectCreateRequest, 'tasks'> {
-  @IsNotEmpty()
-  startDate: string;
+  @IsNumber()
+  startDate: number;
 
-  @IsDateString()
-  @IsNotEmpty()
-  expectedFinishedDate: string;
+  @IsNumber()
+  expectedFinishedDate: number;
 
   @IsString()
   responsible: string;
@@ -26,7 +25,7 @@ export class ProjectCreateRequestDto implements PartialBy<PROTO.ProjectCreateReq
   tasks?: string[];
 }
 
-export class ProjectFindAllRequestDto implements PROTO.ProjectFindAllRequest {}
+export class ProjectFindAllRequestDto implements PROTO.ProjectFindAllRequest { }
 
 export class ProjectFindOneRequestDto implements PROTO.ProjectFindOneRequest {
   @IsString()
@@ -34,8 +33,8 @@ export class ProjectFindOneRequestDto implements PROTO.ProjectFindOneRequest {
 }
 
 export class UpdateProjectDataDto implements PROTO.UpdateProjectData {
-  expectedFinishedDate?: string;
-  startDate?: string;
+  expectedFinishedDate?: number;
+  startDate?: number;
   status?: PROTO.Status;
 
   @IsString()
