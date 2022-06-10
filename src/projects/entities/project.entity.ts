@@ -11,14 +11,14 @@ export class Project {
   @Prop({ required: false, default: Status.ACTIVE })
   status: Status;
 
-  @Prop({ type: Date, default: Date.now })
-  startDate: Date;
+  @Prop()
+  startDate: number;
 
-  @Prop({ type: Date })
-  endDate: Date;
+  @Prop()
+  endDate: number;
 
-  @Prop({ type: Date })
-  expectedFinishedDate: Date;
+  @Prop()
+  expectedFinishedDate: number;
 
   @Prop()
   responsible: string;
