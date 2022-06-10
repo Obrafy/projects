@@ -30,6 +30,10 @@ enum UnityType {
 }
 
 export class TaskCreateRequestDto implements TaskCreateRequest {
+
+  @IsNumber()
+  priority: number;
+
   @IsNotEmpty()
   category: string;
 
