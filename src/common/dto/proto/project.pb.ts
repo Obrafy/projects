@@ -196,7 +196,9 @@ export interface Task {
   description: string;
   unity: UnityType;
   possibleSkills: PossibleSkills[];
-  laborers: string[];
+  id: string;
+  status: string;
+  priority: number;
 }
 
 export interface PossibleSkills {
@@ -292,13 +294,14 @@ export interface TaskCreateRequest {
   description: string;
   unity: UnityType;
   possibleSkills: PossibleSkills[];
+  priority: number;
 }
 
 /** Response */
 export interface TaskCreateResponse {
   status: number;
   error: string[];
-  data: TaskResponseData | undefined;
+  data: Task | undefined;
 }
 
 /**
@@ -311,7 +314,7 @@ export interface TaskFindAllRequest {}
 export interface TaskFindAllResponse {
   status: number;
   error: string[];
-  data: TaskResponseData[];
+  data: Task[];
 }
 
 /**
@@ -326,7 +329,7 @@ export interface TaskFindOneRequest {
 export interface TaskFindOneResponse {
   status: number;
   error: string[];
-  data: TaskResponseData | undefined;
+  data: Task | undefined;
 }
 
 /**
@@ -342,7 +345,7 @@ export interface TaskUpdateRequest {
 export interface TaskUpdateResponse {
   status: number;
   error: string[];
-  data: TaskResponseData | undefined;
+  data: Task | undefined;
 }
 
 export interface TaskUpdateData {
@@ -350,6 +353,7 @@ export interface TaskUpdateData {
   activity?: string | undefined;
   noiseLevel?: string | undefined;
   dirtLevel?: string | undefined;
+  priority?: number | undefined;
 }
 
 /**
@@ -360,28 +364,13 @@ export interface TaskRemoveRequest {
   taskId: string;
 }
 
+export interface TaskRemoveDataResponse {}
+
 /** Response */
 export interface TaskRemoveResponse {
   status: number;
   error: string[];
   data: TaskRemoveDataResponse | undefined;
-}
-
-export interface TaskRemoveDataResponse {}
-
-export interface TaskResponse {
-  category: string;
-  activity: string;
-  noiseLevel: LevelType;
-  dirtLevel: LevelType;
-  description: string;
-  unity: UnityType;
-  possibleSkills: PossibleSkills[];
-  status: Status;
-}
-
-export interface TaskResponseData {
-  task: TaskResponse | undefined;
 }
 
 /**
