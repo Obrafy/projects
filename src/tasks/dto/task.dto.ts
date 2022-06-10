@@ -1,14 +1,5 @@
 import { Type } from 'class-transformer';
-import {
-  IsString,
-  IsEnum,
-  IsOptional,
-  IsNumber,
-  IsArray,
-  IsNotEmpty,
-  ValidateNested,
-  IsMongoId,
-} from 'class-validator';
+import { IsString, IsEnum, IsNumber, IsNotEmpty, ValidateNested, IsMongoId } from 'class-validator';
 import { TransformEnum } from 'src/common/decorators/transform-enum.decorator';
 import {
   TaskCreateRequest,
@@ -60,6 +51,9 @@ export class TaskCreateRequestDto implements TaskCreateRequest {
   @TransformEnum(UnityType, ProtoUnitType)
   unity: UnityType;
 
+  @IsNumber()
+  effort: number;
+
   @Type(() => PossibleSkillsDto)
   @ValidateNested()
   possibleSkills: PossibleSkillsDto[];
@@ -72,7 +66,7 @@ class PossibleSkillsDto implements PossibleSkills {
   requiredSkillLevel: number;
 }
 
-export class TaskFindAllRequestDto implements TaskFindAllRequest { }
+export class TaskFindAllRequestDto implements TaskFindAllRequest {}
 
 export class TaskFindOneRequestDto implements TaskFindOneRequest {
   @IsMongoId()
@@ -92,37 +86,6 @@ export class TaskRemoveRequestDto implements TaskRemoveRequest {
   @IsMongoId()
   public readonly taskId: string;
 }
-
-export class TaskDto {
-  @IsString()
-  category: string;
-
-  @IsString()
-  activity: string;
-
-  @IsArray()
-  laborers: string[];
-
-  @IsEnum(LevelType)
-  @IsOptional()
-  noiseLevel: LevelType;
-
-  @IsEnum(LevelType)
-  @IsOptional()
-  dirtLevel: LevelType;
-
-  @IsString()
-  description: string;
-
-  @IsEnum(UnityType)
-  @IsOptional()
-  unity: UnityType;
-
-  @Type(() => PossibleSkillsDto)
-  @ValidateNested()
-  possibleSkills: PossibleSkillsDto[];
-}
-
 export class TaskStatusRequestDto implements ActivateTaskRequest, DeactivateTaskRequest {
   @IsMongoId()
   taskId: string;
@@ -145,9 +108,7 @@ export class AddSkillToTaskRequestDto implements AddSkillToTaskRequest {
   skills: SkillRequestDto[];
 }
 
-
 export class RemoveSkillToTaskRequestDto implements RemoveSkillToTaskRequest {
-
   @IsMongoId()
   taskId: string;
 

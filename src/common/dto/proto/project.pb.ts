@@ -134,6 +134,7 @@ export interface FindAllTaskOfProjectData {
   dirtLevel: LevelType;
   description: string;
   unity: UnityType;
+  effort: number;
   possibleSkills: PossibleSkills[];
 }
 
@@ -161,6 +162,7 @@ export interface FieldsOverrides {
   dirtLevel?: LevelType | undefined;
   description?: string | undefined;
   unity?: UnityType | undefined;
+  effort?: number | undefined;
 }
 
 export interface Project {
@@ -285,6 +287,7 @@ export interface TaskCreateRequest {
   dirtLevel: LevelType;
   description: string;
   unity: UnityType;
+  effort: number;
   possibleSkills: PossibleSkills[];
 }
 
@@ -370,6 +373,7 @@ export interface TaskResponse {
   dirtLevel: LevelType;
   description: string;
   unity: UnityType;
+  effort: number;
   possibleSkills: PossibleSkills[];
   status: Status;
 }

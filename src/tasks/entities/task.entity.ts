@@ -50,6 +50,9 @@ export class Task {
   @Prop({ required: false, default: UnityType.VB })
   unity: UnityType;
 
+  @Prop({ required: false, default: 1 })
+  effort: number;
+
   @Prop({ required: true })
   possibleSkills: PossibleSkills[];
 }

@@ -119,6 +119,7 @@ export class ProjectsController {
         dirtLevel: task.dirtLevel,
         description: task.description,
         unity: task.unity,
+        effort: task.effort,
         possibleSkills: task.possibleSkills,
       };
     });
@@ -182,7 +183,4 @@ export class ProjectsController {
     await this.projectsService.removeLaborersToProject(payload);
     return makeResponse<PROTO.RemoveLaborersToProjectResponse>(null);
   }
-
 }
-
-
