@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import mongoose, { Model, FilterQuery } from 'mongoose';
+import { Model, FilterQuery } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { ClientGrpc } from '@nestjs/microservices';
 import { Project, ProjectDocument } from './entities/project.entity';
@@ -35,7 +35,7 @@ export class ProjectsService {
   // Private Methods
 
   /**
-   * Get an user by id
+   * Get an project by id
    * @param projectId The Project's id
    * @returns The response Project object
    */
@@ -47,14 +47,14 @@ export class ProjectsService {
   }
 
   /**
-   * Get an user by id
+   * Get an projectTask by taskId
    * @param projectId The Project's id
-   * @returns The response Project object
+   * @param taskId The Task's id
+   * @returns The response ProjectTask object
    */
   private async _getProjectTaskByTaskId(project: ProjectDocument, taskId: string): Promise<ProjectTasks> {
     return project.tasks.find(({ task }) => task._id.toString() === taskId);
   }
-
 
   /**
    * Get all projects
@@ -148,17 +148,16 @@ export class ProjectsService {
     const project = await this._getProjectById(projectId);
     if (!project) throw new EXCEPTIONS.NotFoundException(PROJECT_ERROR_MESSAGES_KEYS.PROJECT_NOT_FOUND);
 
+    const projectTask = await this._getProjectTaskByTaskId(project, taskId);
 
-    let projectTask = await this._getProjectTaskByTaskId(project, taskId);
+    if (!projectTask) throw new EXCEPTIONS.NotFoundException(TASK_ERROR_MESSAGES_KEYS.TASK_NOT_FOUND_IN_PROJECT);
 
-    if(!projectTask) throw new EXCEPTIONS.NotFoundException(TASK_ERROR_MESSAGES_KEYS.TASK_NOT_FOUND_IN_PROJECT); 
-    
-    projectTask.fieldsOverrides = { ...projectTask.fieldsOverrides, ...data }
+    projectTask.fieldsOverrides = { ...projectTask.fieldsOverrides, ...data };
 
-    project.markModified('tasks')
-    await project.save()
+    project.markModified('tasks');
+    await project.save();
 
-    return projectTask
+    return projectTask;
   }
 
   public async changeProjectStatus(payload: DTO.ProjectStatusRequestDto, status: Status): Promise<void> {
@@ -214,6 +213,7 @@ export class ProjectsService {
 
     project.tasks = [...project.tasks, ...projectTasks];
 
+    project.markModified('tasks');
     await project.save();
   }
 
@@ -227,12 +227,11 @@ export class ProjectsService {
       throw new EXCEPTIONS.NotFoundException(PROJECT_ERROR_MESSAGES_KEYS.PROJECT_NOT_FOUND);
     }
 
-    const tasksFiltered = project.tasks.filter((item) => {
-      return tasksIds.indexOf((item.task as TaskDocument)._id) === -1;
+    const tasksFiltered = project.tasks.filter(({ task }) => {
+      return tasksIds.indexOf(task._id.toString()) === -1;
     });
 
     project.tasks = tasksFiltered;
-
     await project.save();
   }
 
@@ -246,12 +245,8 @@ export class ProjectsService {
       throw new EXCEPTIONS.NotFoundException(PROJECT_ERROR_MESSAGES_KEYS.PROJECT_NOT_FOUND);
     }
 
-    const projectTaskIndex = project.tasks.findIndex((projectTask) => {
-      return (projectTask.task as TaskDocument)._id.toString() === taskId;
-    });
-
-    if (projectTaskIndex === -1)
-      throw new EXCEPTIONS.NotFoundException(TASK_ERROR_MESSAGES_KEYS.TASK_NOT_FOUND_IN_PROJECT);
+    const projectTask = await this._getProjectTaskByTaskId(project, taskId);
+    if (!projectTask) throw new EXCEPTIONS.NotFoundException(TASK_ERROR_MESSAGES_KEYS.TASK_NOT_FOUND_IN_PROJECT);
 
     const validLaborers = await Promise.all(
       laborers.map(async (userId) => {
@@ -261,7 +256,7 @@ export class ProjectsService {
       }),
     );
 
-    project.tasks[projectTaskIndex].laborers = validLaborers;
+    projectTask.laborers = validLaborers;
     project.markModified('tasks');
     await project.save();
   }
@@ -276,18 +271,14 @@ export class ProjectsService {
       throw new EXCEPTIONS.NotFoundException(PROJECT_ERROR_MESSAGES_KEYS.PROJECT_NOT_FOUND);
     }
 
-    const projectTaskIndex = project.tasks.findIndex((projectTask) => {
-      return (projectTask.task as TaskDocument)._id.toString() === taskId;
-    });
+    const projectTask = await this._getProjectTaskByTaskId(project, taskId);
+    if (!projectTask) throw new EXCEPTIONS.NotFoundException(TASK_ERROR_MESSAGES_KEYS.TASK_NOT_FOUND_IN_PROJECT);
 
-    if (projectTaskIndex === -1)
-      throw new EXCEPTIONS.NotFoundException(TASK_ERROR_MESSAGES_KEYS.TASK_NOT_FOUND_IN_PROJECT);
-
-    const laborersFiltered = project.tasks[projectTaskIndex].laborers.filter((userId) => {
+    const laborersFiltered = projectTask.laborers.filter((userId) => {
       return laborers.indexOf(userId) === -1;
     });
 
-    project.tasks[projectTaskIndex].laborers = laborersFiltered;
+    projectTask.laborers = laborersFiltered;
     project.markModified('tasks');
     await project.save();
   }

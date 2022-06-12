@@ -25,7 +25,7 @@ export class TasksController {
       possibleSkills: task.possibleSkills,
       status: task.status,
       id: task._id,
-      priority: task.priority
+      priority: task.priority,
     });
   }
 
@@ -44,7 +44,7 @@ export class TasksController {
         possibleSkills: task.possibleSkills,
         status: task.status,
         id: task._id,
-        priority: task.priority
+        priority: task.priority,
       };
     });
 
@@ -65,7 +65,7 @@ export class TasksController {
       possibleSkills: task.possibleSkills,
       status: task.status,
       id: task._id,
-      priority: task.priority
+      priority: task.priority,
     });
   }
 
@@ -86,7 +86,7 @@ export class TasksController {
       possibleSkills: task.possibleSkills,
       status: task.status,
       id: task._id,
-      priority: task.priority
+      priority: task.priority,
     });
   }
 

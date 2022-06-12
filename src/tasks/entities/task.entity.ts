@@ -29,7 +29,6 @@ export class PossibleSkills {
 }
 @Schema()
 export class Task {
-  
   @Prop({ required: true })
   priority: number;
 

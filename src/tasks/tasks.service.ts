@@ -1,7 +1,7 @@
 import { Model, FilterQuery } from 'mongoose';
 import { ClientGrpc } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
-import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { PossibleSkills, Task, TaskDocument } from './entities/task.entity';
 import * as DTO from '../tasks/dto/task.dto';
 import { SkillManagementServiceClient, SKILL_MANAGEMENT_SERVICE_NAME } from 'src/common/dto/proto/auth.pb';
@@ -9,7 +9,6 @@ import { TASK_ERROR_MESSAGES_KEYS } from 'src/common/error-messages/error-messag
 import * as EXCEPTIONS from '@nestjs/common/exceptions';
 import { Status } from 'src/common/dto/status.enum';
 import { firstValueFrom } from 'rxjs';
-import { Console } from 'console';
 
 @Injectable()
 export class TasksService {

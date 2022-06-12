@@ -98,7 +98,7 @@ export class FieldsOverridesDataDto implements PROTO.FieldsOverrides {
 
   @IsNumber()
   @IsOptional()
-  priority: number; 
+  priority: number;
 }
 
 export class FieldsOverridesRequestDto implements PROTO.FieldsOverridesRequest {
