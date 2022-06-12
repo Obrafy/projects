@@ -135,22 +135,16 @@ export class ProjectsController {
     taskId,
     data,
   }: DTO.FieldsOverridesRequestDto): Promise<PROTO.FieldsOverridesResponse> {
+
     const taskProjectData = await this.projectsService.fieldsOverrides({
       projectId,
       taskId,
       data: data as DTO.FieldsOverridesDataDto,
     });
 
-    const task = taskProjectData.tasks[0].task;
-
     const result = {
-      category: task.category,
-      activity: task.activity,
-      noiseLevel: task.noiseLevel,
-      dirtLevel: task.dirtLevel,
-      description: task.description,
-      unity: task.unity,
-      possibleSkills: task.possibleSkills,
+      ...taskProjectData,
+      task: taskProjectData.task._id
     };
 
     return makeResponse<PROTO.FieldsOverridesResponse>(result);

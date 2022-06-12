@@ -149,7 +149,15 @@ export interface FieldsOverridesRequest {
 export interface FieldsOverridesResponse {
   status: number;
   error: string[];
-  data: FieldsOverrides | undefined;
+  data: FieldsOverridesTaskOfProjectData | undefined;
+}
+
+export interface FieldsOverridesTaskOfProjectData {
+  task: string;
+  laborers: string[];
+  effort: number;
+  durationInWorkDays: number;
+  fieldsOverrides?: FieldsOverrides | undefined;
 }
 
 export interface FieldsOverrides {
@@ -159,6 +167,7 @@ export interface FieldsOverrides {
   dirtLevel?: LevelType | undefined;
   description?: string | undefined;
   unity?: UnityType | undefined;
+  priority?: number | undefined;
 }
 
 export interface Project {

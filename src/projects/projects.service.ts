@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { Model, FilterQuery } from 'mongoose';
+import mongoose, { Model, FilterQuery } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { ClientGrpc } from '@nestjs/microservices';
 import { Project, ProjectDocument } from './entities/project.entity';
@@ -45,6 +45,16 @@ export class ProjectsService {
       status: { $ne: Status.DELETED },
     });
   }
+
+  /**
+   * Get an user by id
+   * @param projectId The Project's id
+   * @returns The response Project object
+   */
+  private async _getProjectTaskByTaskId(project: ProjectDocument, taskId: string): Promise<ProjectTasks> {
+    return project.tasks.find(({ task }) => task._id.toString() === taskId);
+  }
+
 
   /**
    * Get all projects
@@ -132,14 +142,23 @@ export class ProjectsService {
     return project;
   }
 
-  public async fieldsOverrides({ projectId, taskId, data }: DTO.FieldsOverridesRequestDto): Promise<ProjectDocument> {
+  public async fieldsOverrides({ projectId, taskId, data }: DTO.FieldsOverridesRequestDto) {
     this.logger.log('Make fields Overrides', data);
 
     const project = await this._getProjectById(projectId);
+    if (!project) throw new EXCEPTIONS.NotFoundException(PROJECT_ERROR_MESSAGES_KEYS.PROJECT_NOT_FOUND);
 
-    const projectTask = project.tasks.find(({ task }) => (task as TaskDocument)._id === taskId);
-    projectTask.fieldsOverrides = data;
-    return project.save();
+
+    let projectTask = await this._getProjectTaskByTaskId(project, taskId);
+
+    if(!projectTask) throw new EXCEPTIONS.NotFoundException(TASK_ERROR_MESSAGES_KEYS.TASK_NOT_FOUND_IN_PROJECT); 
+    
+    projectTask.fieldsOverrides = { ...projectTask.fieldsOverrides, ...data }
+
+    project.markModified('tasks')
+    await project.save()
+
+    return projectTask
   }
 
   public async changeProjectStatus(payload: DTO.ProjectStatusRequestDto, status: Status): Promise<void> {

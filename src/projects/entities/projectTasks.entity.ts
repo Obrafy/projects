@@ -37,6 +37,7 @@ export class ProjectTasks {
 
   @Prop(
     raw({
+      priority: { type: Number },
       category: { type: String },
       activity: { type: String },
       noiseLevel: { type: String },

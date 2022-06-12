@@ -95,6 +95,10 @@ export class FieldsOverridesDataDto implements PROTO.FieldsOverrides {
   @IsEnum(UnityType)
   @IsOptional()
   unity: UnityType;
+
+  @IsNumber()
+  @IsOptional()
+  priority: number; 
 }
 
 export class FieldsOverridesRequestDto implements PROTO.FieldsOverridesRequest {
